@@ -12,7 +12,6 @@ function App() {
     <div style={{ background: "#2b313c", height: "100vh" }}>
       {!gameStarted && (
         <>
-          <Row/>
           <Row justify="space-around" align="middle">
             <Col span={1}>
               <Button onClick={()=>setGameStarted(true)}>Start Game</Button>
