@@ -36,16 +36,16 @@ function App() {
     }
   }
 
-  const randomMove = () => {
-    const moves = chess.moves({ verbose: true })
-    const move = moves[Math.floor(Math.random() * moves.length)]
-    if (moves.length > 0) {
-      chess.move(move.san)
-      setFen(chess.fen())
-      setLastMove([move.from, move.to])
-      setChecked(chess.in_check());
-    }
-  }
+  // const randomMove = () => {
+  //   const moves = chess.moves({ verbose: true })
+  //   const move = moves[Math.floor(Math.random() * moves.length)]
+  //   if (moves.length > 0) {
+  //     chess.move(move.san)
+  //     setFen(chess.fen())
+  //     setLastMove([move.from, move.to])
+  //     setChecked(chess.in_check());
+  //   }
+  // }
 
   const promotion = e => {
     const from = pendingMove[0]
