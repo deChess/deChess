@@ -34,7 +34,7 @@ function PlayModal(props) {
       />
       <div style={{ marginTop: 10 }}>
         <Text>
-          {`Give this URL to your friend: ${[window.location.protocol, '//', window.location.host].join('')}/game/${btoa(`${friendAddress}[insert p2p info]`)}`}
+          {`Give this URL to your friend: ${window.location.href.replace(window.location.hash, '')}#/game/${btoa(`${friendAddress}[insert p2p info]`)}`}
         </Text>
       </div>
     </Modal>
