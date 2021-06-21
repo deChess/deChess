@@ -1,9 +1,11 @@
 import { Button } from 'antd';
-import React from 'react';
-import 'antd/dist/antd.css';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import PlayModal from './PlayModal';
 
 export default function MainMenu(props) {
-  const { setGameStarted, setSettings } = props;
+  const { setSettings } = props;
+  const [selectVisible, setSelectVisible] = useState(false);
 
   return (
     <div style={{
@@ -13,10 +15,7 @@ export default function MainMenu(props) {
       <Button
         style={{ minWidth: '150px', width: '40vw' }}
         onClick={() => {
-          setSettings({
-            vsComputer: false,
-          });
-          setGameStarted(true);
+          setSelectVisible(true);
         }}
       >
         Play with Friend
@@ -27,11 +26,15 @@ export default function MainMenu(props) {
           setSettings({
             vsComputer: true,
           });
-          setGameStarted(true);
         }}
       >
-        Play with Computer
+        <Link to="/game">Play with Computer</Link>
       </Button>
+      <PlayModal
+        selectVisible={selectVisible}
+        setSelectVisible={setSelectVisible}
+        setSettings={setSettings}
+      />
       <div />
       <div />
       <div />

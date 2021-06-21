@@ -1,40 +1,61 @@
 import React, { useState } from 'react';
 import Layout, { Content, Footer, Header } from 'antd/lib/layout/layout';
-import { Menu } from 'antd';
+import {
+  Switch,
+  Route,
+  Redirect,
+  useLocation,
+} from 'react-router-dom';
 import ChessBoard from './components/Chessboard';
-import MainMenu from './components/Menu';
+import MainMenu from './components/MainMenu';
+import NavBar from './components/NavBar';
 import 'antd/dist/antd.css';
 import './App.css';
 
 function App() {
-  const [gameStarted, setGameStarted] = useState(false);
   const [settings, setSettings] = useState({ vsComputer: false });
-  const [page, setPage] = useState('play');
+  const [account, setAccount] = useState();
 
   return (
-    <div>
-      <Layout>
-        {!gameStarted && (
+    <Layout>
+      {useLocation().pathname !== '/game' && (
         <Header>
-          <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['play']}>
-            <Menu.Item onClick={() => setPage('play')} key="play">play</Menu.Item>
-            <Menu.Item onClick={() => setPage('NFTs')} key="NFTs">NFTs</Menu.Item>
-          </Menu>
+          <NavBar account={account} setAccount={setAccount} />
         </Header>
-        )}
-        {!gameStarted && (
-        <Content style={{
-          height: 'calc(100vh - 70px - 64px)',
-          background: '#2b313c',
-        }}
-        >
-          {page === 'play' && <MainMenu setSettings={setSettings} setGameStarted={setGameStarted} />}
-        </Content>
-        )}
-        {gameStarted && <ChessBoard settings={settings} />}
-        {!gameStarted && <Footer>Made with &#10084;&#65039;</Footer>}
-      </Layout>
-    </div>
+      )}
+      <Switch>
+        <Route exact path="/">
+          <Redirect to="/play" />
+        </Route>
+        <Route path="/store">
+          <Content style={{
+            height: 'calc(100vh - 70px - 64px)',
+            background: '#2b313c',
+          }}
+          >
+            <div>Store Stuff</div>
+          </Content>
+        </Route>
+        <Route path="/play">
+          <Content style={{
+            height: 'calc(100vh - 70px - 64px)',
+            background: '#2b313c',
+          }}
+          >
+            <MainMenu setSettings={setSettings} />
+          </Content>
+        </Route>
+        <Route path="/game">
+          <ChessBoard settings={settings} />
+        </Route>
+
+        <Route path="/404">
+          <div>404 not found</div>
+        </Route>
+        <Redirect to="/404" />
+      </Switch>
+      {useLocation().pathname !== '/game' && <Footer>Made with &#10084;&#65039;</Footer>}
+    </Layout>
   );
 }
 
