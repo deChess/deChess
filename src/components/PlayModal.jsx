@@ -69,7 +69,7 @@ function PlayModal(props) {
             await stream.grantPermission('stream_subscribe', value);
           }
 
-          console.log(await stream.getPermissions());
+          // console.log(await stream.getPermissions());
           setFriendAddress(stream);
           setCode(stream);
         }}

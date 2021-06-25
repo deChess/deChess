@@ -16,7 +16,7 @@ function ChessBoard(props) {
   const [fen, setFen] = useState('');
   const [lastMove, setLastMove] = useState();
   const [isChecked, setChecked] = useState(false);
-  console.log(code);
+  // console.log(code);
 
   useEffect(() => {
     client.subscribe({
@@ -24,10 +24,10 @@ function ChessBoard(props) {
     },
     (message) => {
       // This function will be called when new messages occur
-      console.log(JSON.stringify(message));
-      console.log(message.fen);
+      // console.log(JSON.stringify(message));
+      // console.log(message.fen);
       const { move } = message;
-      console.log(move);
+      // console.log(move);
       const { from, to } = move;
       const moves = chess.moves({ verbose: true });
       for (let i = 0, len = moves.length; i < len; i++) { /* eslint-disable-line */
@@ -73,12 +73,12 @@ function ChessBoard(props) {
         move:
         { from, to, promotion: 'q' },
         fen: chess.fen(),
-      })
-        .then(() => console.log('Sent successfully: ', {
-          move:
-          { from, to, promotion: 'q' },
-          fen: chess.fen(),
-        }));
+      });
+      // .then(() => console.log('Sent successfully: ', {
+      //   move:
+      //   { from, to, promotion: 'q' },
+      //   fen: chess.fen(),
+      // }));
       if (vsComputer) { setTimeout(randomMove, 500); }
     }
   };
@@ -96,12 +96,12 @@ function ChessBoard(props) {
       move:
       { from, to, promotion: 'q' },
       fen: chess.fen(),
-    })
-      .then(() => console.log('Sent successfully: ', {
-        move:
-          { from, to, promotion: 'q' },
-        fen: chess.fen(),
-      }));
+    });
+    // .then(() => console.log('Sent successfully: ', {
+    //   move:
+    //     { from, to, promotion: 'q' },
+    //   fen: chess.fen(),
+    // }));
     if (vsComputer) { setTimeout(randomMove, 500); }
   };
 

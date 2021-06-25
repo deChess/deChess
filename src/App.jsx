@@ -16,7 +16,7 @@ function App() {
   const [settings, setSettings] = useState({ vsComputer: false });
   const [code, setCode] = useState('');
   const [account, setAccount] = useState();
-  console.log(code);
+  // console.log(code);
 
   return (
     <Layout>
