@@ -16,6 +16,7 @@ function ChessBoard(props) {
   const [fen, setFen] = useState('');
   const [lastMove, setLastMove] = useState();
   const [isChecked, setChecked] = useState(false);
+  const [viewOnly, setViewOnly] = useState(true);
   // console.log(code);
 
   useEffect(() => {
@@ -26,21 +27,24 @@ function ChessBoard(props) {
       // This function will be called when new messages occur
       // console.log(JSON.stringify(message));
       // console.log(message.fen);
-      const { move } = message;
-      // console.log(move);
-      const { from, to } = move;
-      const moves = chess.moves({ verbose: true });
-      for (let i = 0, len = moves.length; i < len; i++) { /* eslint-disable-line */
-        if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
-          setPendingMove([from, to]);
-          setSelectVisible(true);
-          return;
+      setViewOnly(false);
+      if (message.hello !== 'world') {
+        const { move } = message;
+        // console.log(move);
+        const { from, to } = move;
+        const moves = chess.moves({ verbose: true });
+        for (let i = 0, len = moves.length; i < len; i++) { /* eslint-disable-line */
+          if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
+            setPendingMove([from, to]);
+            setSelectVisible(true);
+            return;
+          }
         }
-      }
-      if (chess.move({ from, to, promotion: 'q' })) {
-        setFen(chess.fen());
-        setLastMove([from, to]);
-        setChecked(chess.in_check());
+        if (chess.move({ from, to, promotion: 'q' })) {
+          setFen(chess.fen());
+          setLastMove([from, to]);
+          setChecked(chess.in_check());
+        }
       }
     });
   }, [code]);
@@ -109,10 +113,12 @@ function ChessBoard(props) {
 
   const calcMovable = () => {
     const dests = new Map();
-    chess.SQUARES.forEach((s) => {
-      const ms = chess.moves({ square: s, verbose: true });
-      if (ms.length) dests.set(s, ms.map((m) => m.to));
-    });
+    if (!viewOnly) {
+      chess.SQUARES.forEach((s) => {
+        const ms = chess.moves({ square: s, verbose: true });
+        if (ms.length) dests.set(s, ms.map((m) => m.to));
+      });
+    }
     return {
       free: false,
       dests,

@@ -21,16 +21,16 @@ function PlayModal(props) {
       }}
       onOk={async () => {
         // Subscribe to a stream
-        if (code !== '' && friendAddress === '') {
+        // if (code !== '' && friendAddress === '') {
         // Here is the event we'll be sending
-          const msg = {
-            hello: 'world',
-            random: Math.random(),
-          };
+        const msg = {
+          hello: 'world',
+          random: Math.random(),
+        };
 
-          // Publish the event to the Stream
-          await client.publish(code, msg);
-        }
+        // Publish the event to the Stream
+        await client.publish(code, msg);
+        // }
         if (code !== '' || friendAddress !== '') {
           history.push('/game');
         }
@@ -70,7 +70,7 @@ function PlayModal(props) {
           }
 
           // console.log(await stream.getPermissions());
-          setFriendAddress(stream);
+          setFriendAddress(value);
           setCode(stream);
         }}
         // style={{ marginTop: 10 }}
@@ -79,7 +79,7 @@ function PlayModal(props) {
       />
       <div style={{ marginTop: 10 }}>
         <Text>
-          {`Give this code to your friend: ${friendAddress.id}`}
+          {`Give this code to your friend: ${code.id}`}
         </Text>
       </div>
     </Modal>
