@@ -14,7 +14,9 @@ import './App.css';
 
 function App() {
   const [settings, setSettings] = useState({ vsComputer: false });
+  const [code, setCode] = useState('');
   const [account, setAccount] = useState();
+  console.log(code);
 
   return (
     <Layout>
@@ -42,11 +44,11 @@ function App() {
             background: '#2b313c',
           }}
           >
-            <MainMenu setSettings={setSettings} />
+            <MainMenu code={code} setCode={setCode} client={account} setSettings={setSettings} />
           </Content>
         </Route>
         <Route path="/game">
-          <ChessBoard settings={settings} />
+          <ChessBoard code={code} client={account} settings={settings} />
         </Route>
 
         <Route path="/404">

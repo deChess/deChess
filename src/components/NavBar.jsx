@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Menu } from 'antd';
-import { ethers } from 'ethers';
 import {
   Link,
 } from 'react-router-dom';
 
+const StreamrClient = require('streamr-client');
+
 function NavBar(props) {
-  const { setAccount, account } = props;
+  const { setAccount } = props;
+  const { ethereum } = window;
+  const [address, setAddress] = useState('');
 
   return (
     <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['play']}>
@@ -14,15 +17,22 @@ function NavBar(props) {
       <Menu.Item key="NFTs"><Link to="/store">Store</Link></Menu.Item>
       <Menu.Item
         onClick={async () => {
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
-          await provider.send('eth_requestAccounts', []);
-          const signer = provider.getSigner();
-          setAccount(await signer.getAddress());
+          if (!ethereum) {
+            setAddress('no wallet detected');
+            return;
+          }
+          const client = await new StreamrClient({
+            // restUrl: 'http://localhost/api/v1', // if you want to test locally in the streamr-docker-dev environment
+            auth: { ethereum },
+            publishWithSignature: 'never',
+          });
+          setAccount(client);
+          setAddress(ethereum.selectedAddress);
         }}
         style={{ position: 'absolute', top: 0, right: 0 }}
         key="Connect"
       >
-        {account || 'Connect'}
+        {address || 'Connect'}
       </Menu.Item>
     </Menu>
   );

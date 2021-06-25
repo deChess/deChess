@@ -4,7 +4,9 @@ import { Link } from 'react-router-dom';
 import PlayModal from './PlayModal';
 
 export default function MainMenu(props) {
-  const { setSettings } = props;
+  const {
+    setSettings, client, code, setCode,
+  } = props;
   const [selectVisible, setSelectVisible] = useState(false);
 
   return (
@@ -34,6 +36,9 @@ export default function MainMenu(props) {
         selectVisible={selectVisible}
         setSelectVisible={setSelectVisible}
         setSettings={setSettings}
+        client={client}
+        code={code}
+        setCode={setCode}
       />
       <div />
       <div />

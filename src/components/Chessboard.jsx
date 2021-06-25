@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Chess from 'chess.js';
 import Chessground from 'react-chessground';
 import 'react-chessground/dist/styles/chessground.css';
@@ -9,13 +9,41 @@ import bishop from '../images/wB.svg';
 import knight from '../images/wN.svg';
 
 function ChessBoard(props) {
-  const { settings: { vsComputer } } = props;
+  const { settings: { vsComputer }, client, code } = props;
   const [chess] = useState(new Chess());
   const [pendingMove, setPendingMove] = useState();
   const [selectVisible, setSelectVisible] = useState(false);
   const [fen, setFen] = useState('');
   const [lastMove, setLastMove] = useState();
   const [isChecked, setChecked] = useState(false);
+  console.log(code);
+
+  useEffect(() => {
+    client.subscribe({
+      stream: code,
+    },
+    (message) => {
+      // This function will be called when new messages occur
+      console.log(JSON.stringify(message));
+      console.log(message.fen);
+      const { move } = message;
+      console.log(move);
+      const { from, to } = move;
+      const moves = chess.moves({ verbose: true });
+      for (let i = 0, len = moves.length; i < len; i++) { /* eslint-disable-line */
+        if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
+          setPendingMove([from, to]);
+          setSelectVisible(true);
+          return;
+        }
+      }
+      if (chess.move({ from, to, promotion: 'q' })) {
+        setFen(chess.fen());
+        setLastMove([from, to]);
+        setChecked(chess.in_check());
+      }
+    });
+  }, [code]);
 
   const randomMove = () => {
     const moves = chess.moves({ verbose: true });
@@ -41,6 +69,16 @@ function ChessBoard(props) {
       setFen(chess.fen());
       setLastMove([from, to]);
       setChecked(chess.in_check());
+      client.publish(code, {
+        move:
+        { from, to, promotion: 'q' },
+        fen: chess.fen(),
+      })
+        .then(() => console.log('Sent successfully: ', {
+          move:
+          { from, to, promotion: 'q' },
+          fen: chess.fen(),
+        }));
       if (vsComputer) { setTimeout(randomMove, 500); }
     }
   };
@@ -54,6 +92,16 @@ function ChessBoard(props) {
     setLastMove([from, to]);
     setSelectVisible(false);
     setChecked(chess.in_check());
+    client.publish(code, {
+      move:
+      { from, to, promotion: 'q' },
+      fen: chess.fen(),
+    })
+      .then(() => console.log('Sent successfully: ', {
+        move:
+          { from, to, promotion: 'q' },
+        fen: chess.fen(),
+      }));
     if (vsComputer) { setTimeout(randomMove, 500); }
   };
 

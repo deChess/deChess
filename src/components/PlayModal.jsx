@@ -1,40 +1,85 @@
 import React, { useState } from 'react';
 import {
-  Modal, Input, Checkbox, Typography,
+  Modal, Input, Typography,
 } from 'antd';
+import { useHistory } from 'react-router-dom';
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
 
 function PlayModal(props) {
-  const { selectVisible, setSelectVisible } = props;
-  const [anon, setAnon] = useState(false);
+  const {
+    selectVisible, setSelectVisible, client, code, setCode,
+  } = props;
+  // const [anon, setAnon] = useState(false);
   const [friendAddress, setFriendAddress] = useState('');
 
+  const history = useHistory();
   return (
     <Modal
       onCancel={() => {
         setSelectVisible(false);
       }}
+      onOk={async () => {
+        // Subscribe to a stream
+        if (code !== '' && friendAddress === '') {
+        // Here is the event we'll be sending
+          const msg = {
+            hello: 'world',
+            random: Math.random(),
+          };
+
+          // Publish the event to the Stream
+          await client.publish(code, msg);
+        }
+        if (code !== '' || friendAddress !== '') {
+          history.push('/game');
+        }
+      }}
       visible={selectVisible}
     >
-
-      <Checkbox onChange={({ target: { checked } }) => {
+      <Title level={3}>Join a game:</Title>
+      <Input
+        onChange={async ({ target: { value } }) => {
+          setCode(value);
+        }}
+        placeholder="Enter code"
+      />
+      <div style={{ marginTop: 20 }} />
+      <Title level={3}>Create a game:</Title>
+      {/* <Checkbox onChange={({ target: { checked } }) => {
         setAnon(checked);
       }}
       >
         Anonymous
-      </Checkbox>
+      </Checkbox> */}
       <Input
-        onChange={({ target: { value } }) => {
-          setFriendAddress(value);
+        onChange={async ({ target: { value } }) => {
+          const { ethereum } = window;
+          const { selectedAddress } = ethereum;
+          const stream = await client.getOrCreateStream({
+            id: `${selectedAddress}/game`, // or 0x1234567890123456789012345678901234567890/foo/bar or mydomain.eth/foo/bar
+          });
+          if (!(await stream.hasPermission('stream_get', value))) {
+            await stream.grantPermission('stream_get', value);
+          }
+          if (!(await stream.hasPermission('stream_publish', value))) {
+            await stream.grantPermission('stream_publish', value);
+          }
+          if (!(await stream.hasPermission('stream_subscribe', value))) {
+            await stream.grantPermission('stream_subscribe', value);
+          }
+
+          console.log(await stream.getPermissions());
+          setFriendAddress(stream);
+          setCode(stream);
         }}
-        style={{ marginTop: 10 }}
-        disabled={anon}
+        // style={{ marginTop: 10 }}
+        // disabled={anon}
         placeholder="Enter friend&apos;s ethreum address"
       />
       <div style={{ marginTop: 10 }}>
         <Text>
-          {`Give this URL to your friend: ${window.location.href.replace(window.location.hash, '')}#/game/${btoa(`${friendAddress}[insert p2p info]`)}`}
+          {`Give this code to your friend: ${friendAddress.id}`}
         </Text>
       </div>
     </Modal>
