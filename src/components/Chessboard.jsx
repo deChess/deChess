@@ -13,7 +13,7 @@ import bishop from '../images/wB.svg';
 import knight from '../images/wN.svg';
 
 function ChessBoard(props) {
-  const { settings: { vsComputer }, client, code } = props;
+  const { settings: { vsComputer }, client, code } = props; // pass in time control here
   const [chess] = useState(new Chess());
   const [pendingMove, setPendingMove] = useState();
   const [selectVisible, setSelectVisible] = useState(false);
@@ -54,14 +54,8 @@ function ChessBoard(props) {
   //  });
   //}, [code]);
 
-  let username1 = 'username1';
-  let username2 = 'username2';
-  let address1 = '0x7E379d280AC80BF9e5D5c30578e165e6c690acC9';
-  let address2 = '0x1d156b9aaCc68E4954a0bF47F3a43FEed61EB1a4';
-  let elo1 = '987';
-  let elo2 = '1234';
-  let time1 = '22:32';
-  let time2 = '9:42'
+  let user1 = {username: '-', address:'-', elo: 0, mins: 15, secs: 0, cs: 0}; //centiseconds i.e. 0.01
+  let user2 = {username: '-', address: '-', elo: 0, mins: 15, secs: 0, cs: 0}
 
   const randomMove = () => {
     const moves = chess.moves({ verbose: true });
@@ -143,6 +137,7 @@ function ChessBoard(props) {
   let userInfoXPos = (window.innerWidth / 2) - (boardsize / 2);
   console.log(userInfoXPos);
 
+
   return (
     <div style={{
       background: '#2b313c',
@@ -152,10 +147,10 @@ function ChessBoard(props) {
       <Row>
         <Col span={6} />
         <Col span={12}>
-          <div className='username'>{username1}</div>
-          <div className='userAddress'>{address1}</div>
-          <div className='elo'>{elo1}</div>
-          <div id='user1Time' className='userTime'>{time1}</div>
+          <div className='username'>{user1.username}</div>
+          <div className='userAddress'>{user1.address}</div>
+          <div className='elo'>{user1.elo}</div>
+          <div id='user1Time' className='userTime'>{user1.mins.toString(10) + ':' + user1.secs.toString(10)}</div>
           <Chessground
             width={boardsize}
             height={boardsize}
@@ -171,10 +166,10 @@ function ChessBoard(props) {
             check={isChecked}
             style={{ marginTop: '10%', marginLeft: '10%' }}
           />
-          <div className='username'>{username2}</div>
-          <div className='userAddress'>{address2}</div>
-          <div className='elo'>{elo2}</div>
-          <div id='user1Time' className='userTime'>{time2}</div>
+          <div className='username'>{user2.username}</div>
+          <div className='userAddress'>{user2.address}</div>
+          <div className='elo'>{user2.elo}</div>
+          <div id='user1Time' className='userTime'>{user2.mins.toString(10) + ':' + user2.secs.toString(10)}</div>
         </Col>
         <Col span={6} />
       </Row>
