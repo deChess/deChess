@@ -1,5 +1,6 @@
 /* eslint-disable */
 import React, { useState, useEffect } from 'react';
+import { Button } from 'antd';
 import Chess from 'chess.js';
 import Chessground from 'react-chessground';
 import 'react-chessground/dist/styles/chessground.css'; // redundant import, but freaks out if i dont import this for whatever reason
@@ -177,6 +178,9 @@ function ChessBoard(props) {
         </Col>
         <Col span={6} />
       </Row>
+      <Button>request takeback</Button>
+      <Button>offer draw</Button>
+      <Button>resign</Button>
       <Modal visible={selectVisible} footer={null} closable={false} centered>
         <div style={{ textAlign: 'center', cursor: 'pointer' }}>
           <span role="presentation" onClick={() => promotion('q')}>
