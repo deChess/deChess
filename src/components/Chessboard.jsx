@@ -24,35 +24,35 @@ function ChessBoard(props) {
   // console.log(code);
   
   //uncomment this later, testing UI against PC and it doesnt load vs computer when this code runs
-  //useEffect(() => {
-  //  client.subscribe({
-  //    stream: code,
-  //  },
-  //  (message) => {
-  //    // This function will be called when new messages occur
-  //    // console.log(JSON.stringify(message));
-  //    // console.log(message.fen);
-  //    setViewOnly(false);
-  //    if (message.hello !== 'world') {
-  //      const { move } = message;
-  //      // console.log(move);
-  //      const { from, to } = move;
-  //      const moves = chess.moves({ verbose: true });
-  //      for (let i = 0, len = moves.length; i < len; i++) { /* eslint-disable-line */
-  //        if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
-  //          setPendingMove([from, to]);
-  //          setSelectVisible(true);
-  //          return;
-  //        }
-  //      }
-  //      if (chess.move({ from, to, promotion: 'q' })) {
-  //        setFen(chess.fen());
-  //        setLastMove([from, to]);
-  //        setChecked(chess.in_check());
-  //      }
-  //    }
-  //  });
-  //}, [code]);
+  useEffect(() => {
+    client.subscribe({
+      stream: code,
+    },
+    (message) => {
+      // This function will be called when new messages occur
+      // console.log(JSON.stringify(message));
+      // console.log(message.fen);
+      setViewOnly(false);
+      if (message.hello !== 'world') {
+        const { move } = message;
+        // console.log(move);
+        const { from, to } = move;
+        const moves = chess.moves({ verbose: true });
+        for (let i = 0, len = moves.length; i < len; i++) { /* eslint-disable-line */
+          if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
+            setPendingMove([from, to]);
+            setSelectVisible(true);
+            return;
+          }
+        }
+        if (chess.move({ from, to, promotion: 'q' })) {
+          setFen(chess.fen());
+          setLastMove([from, to]);
+          setChecked(chess.in_check());
+        }
+      }
+    });
+  }, [code]);
 
   let user1 = {username: '-', address:'-', elo: 0, mins: 15, secs: 0, cs: 0}; //centiseconds i.e. 0.01
   let user2 = {username: '-', address: '-', elo: 0, mins: 15, secs: 0, cs: 0}
