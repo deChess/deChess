@@ -11,7 +11,7 @@
 }
 
 .cg-wrap piece.knight.white {
-	background-image: url('../images/pieces/merida/wN.svg')
+	background-image: url('../images/pieces/hackmoney/wN.svg')
 }
 
 .cg-wrap piece.rook.white {
@@ -19,11 +19,11 @@
 }
 
 .cg-wrap piece.queen.white {
-	background-image: url('../images/pieces/merida/wQ.svg')
+	background-image: url('../images/pieces/hackmoney/wQ.svg')
 }
 
 .cg-wrap piece.king.white {
-	background-image: url('../images/pieces/merida/wK.svg')
+	background-image: url('../images/pieces/hackmoney/wK.svg')
 }
 
 .cg-wrap piece.pawn.black {
@@ -35,7 +35,7 @@
 }
 
 .cg-wrap piece.knight.black {
-	background-image: url('../images/pieces/merida/bN.svg')
+	background-image: url('../images/pieces/hackmoney/bN.svg')
 }
 
 .cg-wrap piece.rook.black {
@@ -43,11 +43,11 @@
 }
 
 .cg-wrap piece.queen.black {
-	background-image: url('../images/pieces/merida/bQ.svg')
+	background-image: url('../images/pieces/hackmoney/bQ.svg')
 }
 
 .cg-wrap piece.king.black {
-	background-image: url('../images/pieces/merida/bK.svg')
+	background-image: url('../images/pieces/hackmoney/bK.svg')
 }
 
 .cg-wrap {
