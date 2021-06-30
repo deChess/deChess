@@ -1,34 +1,59 @@
 .userTime {
     width: 150px;
-    font-size: 30px;
+    font-size: 40px;
     color: white;
     border: 3px solid white;
     text-align: center;
-    right: 13.5%;
-    position: absolute;
-    margin-top: 25px;
 }
 
 .username {
-    left: 10%;
-    margin-top: 17px;
-    position: absolute;
     font-size: 18px;
     color: white;
 }
 
 .userAddress {
-    left: 10%;
-    margin-top: 40px;
-    position: absolute;
     font-size: 16px;
     color: white;
 }
 
 .elo {
-    left: 10%;
-    margin-top: 63px;
-    position: absolute;
     color: white;
     font-size: 16px;
 }
+
+.user {
+    display: flex;
+    width: 200%;
+    justify-content: space-between;
+    list-style: none;
+    margin: 1%;
+}
+
+.userinfo {
+    display: flex;
+    flex-direction: column;
+}
+
+#buttonsAndLogs {
+    background-color: aliceblue;
+    width: 20%;
+    margin: 60px;
+}
+
+#chatbox {
+    background-color: aliceblue;
+    width: 17%;
+    margin: 60px;
+    margin-right: -500px;
+}
+
+#textInput {
+    width: 100%;
+    margin-bottom: 0px;
+}
+
+#everything {
+    display: flex;
+    justify-content: space-between;
+}
+
