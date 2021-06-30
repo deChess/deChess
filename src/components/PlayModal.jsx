@@ -9,7 +9,7 @@ const { Text, Title } = Typography;
 
 function PlayModal(props) {
   const {
-    selectVisible, setSelectVisible, client, code, setCode, address,
+    selectVisible, setSelectVisible, client, code, setCode, address, setSettings,
   } = props;
   // const [anon, setAnon] = useState(false);
   const [friendAddress, setFriendAddress] = useState('');
@@ -30,6 +30,9 @@ function PlayModal(props) {
 
         // Publish the event to the Stream
         await client.publish(code, msg);
+        setSettings({
+          vsComputer: false,
+        });
         if (code !== '' || friendAddress !== '') {
           history.push('/game');
         }
@@ -66,7 +69,6 @@ function PlayModal(props) {
             await stream.grantPermission('stream_subscribe', value);
           }
 
-          // console.log(await stream.getPermissions());
           setFriendAddress(value);
           setCode(stream);
         }}
