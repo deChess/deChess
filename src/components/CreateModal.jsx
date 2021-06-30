@@ -23,7 +23,6 @@ function CreateModal(props) {
       }}
       onOk={async () => {
         if (client) {
-          console.log(code.id);
           if (!code.id) {
             setProcessing(true);
             const provider = new ethers.providers.Web3Provider(window.ethereum);
