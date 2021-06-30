@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 import { Button } from 'antd';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';

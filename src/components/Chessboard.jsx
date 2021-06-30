@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 import React, { useState, useEffect } from 'react';
 import {
   Button, Col, Modal, Row,
@@ -21,6 +22,7 @@ function ChessBoard(props) {
   const [lastMove, setLastMove] = useState();
   const [isChecked, setChecked] = useState(false);
   const [viewOnly, setViewOnly] = useState(true);
+  // console.log(code);
 
   // uncomment this later, testing UI against PC and it doesnt load vs computer when this code runs
   useEffect(() => {
@@ -60,6 +62,13 @@ function ChessBoard(props) {
   const user2 = {
     username: '-', address: '-', elo: 0, mins: 15, secs: 0, cs: 0,
   };
+
+  function formatTime(user) {
+    if (user.mins === 0) {
+      return user.secs.toString(10);
+    }
+    return `${user.mins.toString(10)}:${user.secs.toString(10)}${user.secs === 0 ? '0' : ''}`;
+  }
 
   const randomMove = () => {
     const moves = chess.moves({ verbose: true });
@@ -137,38 +146,67 @@ function ChessBoard(props) {
       height: '100vh',
     }}
     >
-      <Row>
-        <Col span={6} />
-        <Col span={12}>
-          <div className="username">{user1.username}</div>
-          <div className="userAddress">{user1.address}</div>
-          <div className="elo">{user1.elo}</div>
-          <div id="user1Time" className="userTime">{`${user1.mins.toString(10)}:${user1.secs.toString(10)}`}</div>
-          <Chessground
-            width={boardsize}
-            height={boardsize}
-            turnColor={turnColor()}
-            movable={calcMovable()}
-            lastMove={lastMove}
-            fen={fen}
-            onMove={onMove}
-            highlight={{
-              check: true,
-              lastMove: true,
-            }}
-            check={isChecked}
-            style={{ marginTop: '10%', marginLeft: '10%' }}
-          />
-          <div className="username">{user2.username}</div>
-          <div className="userAddress">{user2.address}</div>
-          <div className="elo">{user2.elo}</div>
-          <div id="user1Time" className="userTime">{`${user2.mins.toString(10)}:${user2.secs.toString(10)}`}</div>
-        </Col>
-        <Col span={6} />
-      </Row>
-      <Button>request takeback</Button>
-      <Button>offer draw</Button>
-      <Button>resign</Button>
+      <div id="everything">
+        <div id="chatbox">
+          <ul>
+            <li>text stuff here</li>
+          </ul>
+          <textarea id="textInput">say something nice :)</textarea>
+        </div>
+        <div id="chessboard">
+          <Row>
+            <Col span={6} />
+            <Col span={12}>
+              <section id="boardAndUserInfo">
+                <div className="user">
+                  <div className="userinfo">
+                    <div className="username">{user1.username}</div>
+                    <div className="userAddress">{user1.address}</div>
+                    <div className="elo">{user1.elo}</div>
+                  </div>
+                  <div id="user1Time" className="userTime">{formatTime(user1)}</div>
+                </div>
+                <Chessground
+                  width={boardsize}
+                  height={boardsize}
+                  turnColor={turnColor()}
+                  movable={calcMovable()}
+                  lastMove={lastMove}
+                  fen={fen}
+                  onMove={onMove}
+                  highlight={{
+                    check: true,
+                    lastMove: true,
+                  }}
+                  check={isChecked}
+                  style={{ marginBottom: '3%' }}
+                />
+                <div className="user">
+                  <div className="userinfo">
+                    <div className="username">{user2.username}</div>
+                    <div className="userAddress">{user2.address}</div>
+                    <div className="elo">{user2.elo}</div>
+                  </div>
+                  <div id="user1Time" className="userTime">{formatTime(user2)}</div>
+                </div>
+              </section>
+            </Col>
+            <Col span={6} />
+          </Row>
+        </div>
+        <div id="buttonsAndLog">
+          <div id="log">
+            <ol>
+              <li>moves go here</li>
+            </ol>
+          </div>
+          <div id="buttons">
+            <Button>request takeback</Button>
+            <Button>offer draw</Button>
+            <Button>resign</Button>
+          </div>
+        </div>
+      </div>
       <Modal visible={selectVisible} footer={null} closable={false} centered>
         <div style={{ textAlign: 'center', cursor: 'pointer' }}>
           <span role="presentation" onClick={() => promotion('q')}>
