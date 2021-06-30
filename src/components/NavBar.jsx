@@ -1,16 +1,15 @@
-/* eslint-disable */
-import React, { useState } from 'react';
+import React from 'react';
 import { Menu } from 'antd';
 import {
   Link,
 } from 'react-router-dom';
+import { ethers } from 'ethers';
 
 const StreamrClient = require('streamr-client');
 
 function NavBar(props) {
-  const { setAccount } = props;
+  const { setClient, address, setAddress } = props;
   const { ethereum } = window;
-  const [address, setAddress] = useState('');
 
   return (
     <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['play']}>
@@ -23,13 +22,15 @@ function NavBar(props) {
             setAddress('no wallet detected');
             return;
           }
+          const provider = new ethers.providers.Web3Provider(ethereum);
           const client = await new StreamrClient({
             // restUrl: 'http://localhost/api/v1', // if you want to test locally in the streamr-docker-dev environment
             auth: { ethereum },
             publishWithSignature: 'never',
           });
-          setAccount(client);
-          setAddress(ethereum.selectedAddress);
+          setClient(client);
+          const ensAddress = await provider.lookupAddress(ethereum.selectedAddress);
+          setAddress(ensAddress || ethereum.selectedAddress);
         }}
         style={{ position: 'absolute', top: 0, right: 0 }}
         key="Connect"

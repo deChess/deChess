@@ -16,14 +16,14 @@ import './App.css';
 function App() {
   const [settings, setSettings] = useState({ vsComputer: false });
   const [code, setCode] = useState('');
-  const [account, setAccount] = useState();
-  // console.log(code);
+  const [client, setClient] = useState();
+  const [address, setAddress] = useState('');
 
   return (
     <Layout>
       {useLocation().pathname !== '/game' && (
         <Header>
-          <NavBar account={account} setAccount={setAccount} />
+          <NavBar address={address} setAddress={setAddress} setClient={setClient} />
         </Header>
       )}
       <Switch>
@@ -45,11 +45,11 @@ function App() {
             background: '#2b313c',
           }}
           >
-            <MainMenu code={code} setCode={setCode} client={account} setSettings={setSettings} />
+            <MainMenu address={address} code={code} setCode={setCode} client={client} setSettings={setSettings} />
           </Content>
         </Route>
         <Route path="/game">
-          <ChessBoard code={code} client={account} settings={settings} />
+          <ChessBoard code={code} client={client} settings={settings} />
         </Route>
 
         <Route path="/404">

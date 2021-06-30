@@ -22,7 +22,7 @@
     ],
     "ignorePatterns": ["index.js", "reportWebVitals.js"],
     "rules": {
-        "linebreak-styles": 0,
+        "linebreak-styles": "off",
         "react/prop-types": "off"
     }
 }

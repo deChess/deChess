@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { Button } from 'antd';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -6,7 +5,7 @@ import PlayModal from './PlayModal';
 
 export default function MainMenu(props) {
   const {
-    setSettings, client, code, setCode,
+    setSettings, client, code, setCode, address,
   } = props;
   const [selectVisible, setSelectVisible] = useState(false);
 
@@ -40,6 +39,7 @@ export default function MainMenu(props) {
         client={client}
         code={code}
         setCode={setCode}
+        address={address}
       />
       <div />
       <div />

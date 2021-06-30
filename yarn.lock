@@ -6523,7 +6523,7 @@ etag@~1.8.1:
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha1-Qa4u62XvpiJorr/qg6x9eSmbCIc=
 
-ethers@^5.1.4, ethers@^5.3.1:
+ethers@^5.1.4, ethers@^5.4.0:
   version "5.4.0"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.4.0.tgz#e9fe4b39350bcce5edd410c70bd57ba328ecf474"
   integrity sha512-hqN1x0CV8VMpQ25WnNEjaMqtB3nA4DRAb2FSmmNaUbD1dF6kWbHs8YaXbVvD37FCg3GTEyc4rV9Pxafk1ByHKw==

@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React, { useState } from 'react';
 import {
   Modal, Input, Typography,
@@ -9,7 +8,7 @@ const { Text, Title } = Typography;
 
 function PlayModal(props) {
   const {
-    selectVisible, setSelectVisible, client, code, setCode,
+    selectVisible, setSelectVisible, client, code, setCode, address,
   } = props;
   // const [anon, setAnon] = useState(false);
   const [friendAddress, setFriendAddress] = useState('');
@@ -22,7 +21,6 @@ function PlayModal(props) {
       }}
       onOk={async () => {
         // Subscribe to a stream
-        // if (code !== '' && friendAddress === '') {
         // Here is the event we'll be sending
         const msg = {
           hello: 'world',
@@ -31,7 +29,6 @@ function PlayModal(props) {
 
         // Publish the event to the Stream
         await client.publish(code, msg);
-        // }
         if (code !== '' || friendAddress !== '') {
           history.push('/game');
         }
@@ -55,10 +52,8 @@ function PlayModal(props) {
       </Checkbox> */}
       <Input
         onChange={async ({ target: { value } }) => {
-          const { ethereum } = window;
-          const { selectedAddress } = ethereum;
           const stream = await client.getOrCreateStream({
-            id: `${selectedAddress}/game`, // or 0x1234567890123456789012345678901234567890/foo/bar or mydomain.eth/foo/bar
+            id: `${address}/game`, // or 0x1234567890123456789012345678901234567890/foo/bar or mydomain.eth/foo/bar
           });
           if (!(await stream.hasPermission('stream_get', value))) {
             await stream.grantPermission('stream_get', value);
