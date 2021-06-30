@@ -22,7 +22,8 @@
     ],
     "ignorePatterns": ["index.js", "reportWebVitals.js"],
     "rules": {
-        "linebreak-styles": 0,
-        "react/prop-types": "off"
+        "linebreak-style":"off",
+        "react/prop-types": "off",
+        "no-nested-ternary":"off"
     }
 }

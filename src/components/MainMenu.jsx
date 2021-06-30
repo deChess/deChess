@@ -1,13 +1,15 @@
 import { Button } from 'antd';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import PlayModal from './PlayModal';
+import CreateModal from './CreateModal';
+import JoinModal from './JoinModal';
 
 export default function MainMenu(props) {
   const {
     setSettings, client, code, setCode, address,
   } = props;
-  const [selectVisible, setSelectVisible] = useState(false);
+  const [createVisible, setCreateVisible] = useState(false);
+  const [joinVisible, setJoinVisible] = useState(false);
 
   return (
     <div style={{
@@ -17,13 +19,21 @@ export default function MainMenu(props) {
       <Button
         style={{ minWidth: '150px', width: '40vw' }}
         onClick={() => {
-          setSelectVisible(true);
+          setCreateVisible(true);
         }}
       >
-        Play with Friend
+        Create a game
       </Button>
       <Button
-        style={{ minWidth: '150px', marginTop: '-20px', width: '40vw' }}
+        style={{ minWidth: '150px', width: '40vw' }}
+        onClick={() => {
+          setJoinVisible(true);
+        }}
+      >
+        Join a game
+      </Button>
+      <Button
+        style={{ minWidth: '150px', width: '40vw' }}
         onClick={() => {
           setSettings({
             vsComputer: true,
@@ -32,9 +42,18 @@ export default function MainMenu(props) {
       >
         <Link to="/game">Play with Computer</Link>
       </Button>
-      <PlayModal
-        selectVisible={selectVisible}
-        setSelectVisible={setSelectVisible}
+      <CreateModal
+        createVisible={createVisible}
+        setCreateVisible={setCreateVisible}
+        setSettings={setSettings}
+        client={client}
+        code={code}
+        setCode={setCode}
+        address={address}
+      />
+      <JoinModal
+        joinVisible={joinVisible}
+        setJoinVisible={setJoinVisible}
         setSettings={setSettings}
         client={client}
         code={code}
