@@ -24,30 +24,34 @@ function ChessBoard(props) {
 
   // uncomment this later, testing UI against PC and it doesnt load vs computer when this code runs
   useEffect(() => {
-    client.subscribe({
-      stream: code,
-    },
-    (message) => {
-      // This function will be called when new messages occur
+    if (vsComputer) {
       setViewOnly(false);
-      if (message.hello !== 'world') {
-        const { move } = message;
-        const { from, to } = move;
-        const moves = chess.moves({ verbose: true });
-        for (let i = 0, len = moves.length; i < len; i++) { /* eslint-disable-line */
-          if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
-            setPendingMove([from, to]);
-            setSelectVisible(true);
-            return;
+    } else {
+      client.subscribe({
+        stream: code,
+      },
+      (message) => {
+      // This function will be called when new messages occur
+        setViewOnly(false);
+        if (message.hello !== 'world') {
+          const { move } = message;
+          const { from, to } = move;
+          const moves = chess.moves({ verbose: true });
+          for (let i = 0, len = moves.length; i < len; i += 1) {
+            if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
+              setPendingMove([from, to]);
+              setSelectVisible(true);
+              return;
+            }
+          }
+          if (chess.move({ from, to, promotion: 'q' })) {
+            setFen(chess.fen());
+            setLastMove([from, to]);
+            setChecked(chess.in_check());
           }
         }
-        if (chess.move({ from, to, promotion: 'q' })) {
-          setFen(chess.fen());
-          setLastMove([from, to]);
-          setChecked(chess.in_check());
-        }
-      }
-    });
+      });
+    }
   }, [code]);
 
   const user1 = {
@@ -70,7 +74,7 @@ function ChessBoard(props) {
 
   const onMove = (from, to) => {
     const moves = chess.moves({ verbose: true });
-    for (let i = 0, len = moves.length; i < len; i++) { /* eslint-disable-line */
+    for (let i = 0, len = moves.length; i < len; i += 1) {
       if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
         setPendingMove([from, to]);
         setSelectVisible(true);
@@ -81,17 +85,13 @@ function ChessBoard(props) {
       setFen(chess.fen());
       setLastMove([from, to]);
       setChecked(chess.in_check());
-      client.publish(code, {
-        move:
-        { from, to, promotion: 'q' },
-        fen: chess.fen(),
-      });
-      // .then(() => console.log('Sent successfully: ', {
-      //   move:
-      //   { from, to, promotion: 'q' },
-      //   fen: chess.fen(),
-      // }));
-      if (vsComputer) { setTimeout(randomMove, 500); }
+      if (vsComputer) { setTimeout(randomMove, 500); } else {
+        client.publish(code, {
+          move:
+          { from, to, promotion: 'q' },
+          fen: chess.fen(),
+        });
+      }
     }
   };
 
@@ -104,17 +104,13 @@ function ChessBoard(props) {
     setLastMove([from, to]);
     setSelectVisible(false);
     setChecked(chess.in_check());
-    client.publish(code, {
-      move:
-      { from, to, promotion: 'q' },
-      fen: chess.fen(),
-    });
-    // .then(() => console.log('Sent successfully: ', {
-    //   move:
-    //     { from, to, promotion: 'q' },
-    //   fen: chess.fen(),
-    // }));
-    if (vsComputer) { setTimeout(randomMove, 500); }
+    if (vsComputer) { setTimeout(randomMove, 500); } else {
+      client.publish(code, {
+        move:
+        { from, to, promotion: 'q' },
+        fen: chess.fen(),
+      });
+    }
   };
 
   const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
