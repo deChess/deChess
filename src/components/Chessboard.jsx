@@ -22,8 +22,9 @@ function ChessBoard(props) {
   const [lastMove, setLastMove] = useState();
   const [isChecked, setChecked] = useState(false);
   const [viewOnly, setViewOnly] = useState(true);
-  // console.log(code);
+  const [color, setColor] = useState();
 
+  const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
   // uncomment this later, testing UI against PC and it doesnt load vs computer when this code runs
   useEffect(() => {
     if (vsComputer) {
@@ -33,28 +34,35 @@ function ChessBoard(props) {
         stream: code,
       },
       (message) => {
-      // This function will be called when new messages occur
-        setViewOnly(false);
+        // This function will be called when new messages occur
+
         if (message.hello !== 'world') {
-          const { move } = message;
-          const { from, to } = move;
-          const moves = chess.moves({ verbose: true });
-          for (let i = 0, len = moves.length; i < len; i += 1) {
-            if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
-              setPendingMove([from, to]);
-              setSelectVisible(true);
-              return;
+          if (color !== turnColor()) {
+            const { move } = message;
+            const { from, to } = move;
+            const moves = chess.moves({ verbose: true });
+            for (let i = 0, len = moves.length; i < len; i += 1) {
+              if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
+                setPendingMove([from, to]);
+                setSelectVisible(true);
+                return;
+              }
             }
+            if (chess.move({ from, to, promotion: 'q' })) {
+              setFen(chess.fen());
+              setLastMove([from, to]);
+              setChecked(chess.in_check());
+            }
+            setViewOnly(false);
+          } else {
+            setViewOnly(true);
           }
-          if (chess.move({ from, to, promotion: 'q' })) {
-            setFen(chess.fen());
-            setLastMove([from, to]);
-            setChecked(chess.in_check());
-          }
+        } else if (message.hello === 'world') {
+          setViewOnly(false);
         }
       });
     }
-  }, [code]);
+  }, [code, color]);
 
   const user1 = {
     username: '-', address: '-', elo: 0, mins: 15, secs: 0, cs: 0,
@@ -79,6 +87,7 @@ function ChessBoard(props) {
       setLastMove([move.from, move.to]);
       setChecked(chess.in_check());
     }
+    setViewOnly(false);
   };
 
   const onMove = (from, to) => {
@@ -94,6 +103,7 @@ function ChessBoard(props) {
       setFen(chess.fen());
       setLastMove([from, to]);
       setChecked(chess.in_check());
+      setColor(turnColor());
       if (vsComputer) { setTimeout(randomMove, 500); } else {
         client.publish(code, {
           move:
@@ -113,6 +123,7 @@ function ChessBoard(props) {
     setLastMove([from, to]);
     setSelectVisible(false);
     setChecked(chess.in_check());
+    setColor(turnColor());
     if (vsComputer) { setTimeout(randomMove, 500); } else {
       client.publish(code, {
         move:
@@ -121,8 +132,6 @@ function ChessBoard(props) {
       });
     }
   };
-
-  const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
 
   const calcMovable = () => {
     const dests = new Map();
