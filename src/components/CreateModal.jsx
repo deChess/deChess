@@ -85,12 +85,14 @@ function CreateModal(props) {
           }}
         // style={{ marginTop: 10 }}
         // disabled={anon}
-          placeholder="Enter friend&apos;s ethreum address"
+          placeholder="Enter friend&apos;s ethereum address"
         />
       ) : (<Alert type="error" message="Please login on the top right first" />)}
       <div style={{ marginTop: 10 }}>
-        {code !== '' && (code.id ? <Alert type="success" message={`Give this code to your friend: "${code.id}" then press OK again to start`} />
+        {code !== '' && (code.id ? <Alert type="success" message={`Give this code to your friend: "${code.id}" then press OK again to start`} /> // eslint-disable-line
           : (processing ? <Alert message="Processing..." /> : <Alert type="error" message="Invalid address" />))}
+        {' '}
+        {' '}
       </div>
     </Modal>
   );

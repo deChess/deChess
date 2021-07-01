@@ -149,6 +149,7 @@ function ChessBoard(props) {
 
   const boardsize = Math.round((Math.min(window.innerWidth, window.innerHeight) * 0.77) / 8) * 8;
 
+  // eslint-disable-next-line no-return-assign
   return (
     <div style={{
       background: '#2b313c',
@@ -157,14 +158,11 @@ function ChessBoard(props) {
     >
       <div id="everything">
         <div id="chatbox">
-          <ul>
-            <li>text stuff here</li>
-          </ul>
-          <textarea id="textInput">say something nice :)</textarea>
+          <p>chat stuff goes here</p>
+          <input id="textInput" />
         </div>
         <div id="chessboard">
           <Row>
-            <Col span={6} />
             <Col span={12}>
               <section id="boardAndUserInfo">
                 <div className="user">
@@ -175,21 +173,23 @@ function ChessBoard(props) {
                   </div>
                   <div id="user1Time" className="userTime">{formatTime(user1)}</div>
                 </div>
-                <Chessground
-                  width={boardsize}
-                  height={boardsize}
-                  turnColor={turnColor()}
-                  movable={calcMovable()}
-                  lastMove={lastMove}
-                  fen={fen}
-                  onMove={onMove}
-                  highlight={{
-                    check: true,
-                    lastMove: true,
-                  }}
-                  check={isChecked}
-                  style={{ marginBottom: '3%' }}
-                />
+                <div id="chessboard">
+                  <Chessground
+                    width={boardsize}
+                    height={boardsize}
+                    turnColor={turnColor()}
+                    movable={calcMovable()}
+                    lastMove={lastMove}
+                    fen={fen}
+                    onMove={onMove}
+                    highlight={{
+                      check: true,
+                      lastMove: true,
+                    }}
+                    check={isChecked}
+                    style={{ margin: '5%' }}
+                  />
+                </div>
                 <div className="user">
                   <div className="userinfo">
                     <div className="username">{user2.username}</div>
@@ -200,19 +200,19 @@ function ChessBoard(props) {
                 </div>
               </section>
             </Col>
-            <Col span={6} />
+
           </Row>
         </div>
-        <div id="buttonsAndLog">
+        <div id="logAndButtons">
           <div id="log">
             <ol>
               <li>moves go here</li>
             </ol>
           </div>
+          <br />
           <div id="buttons">
-            <Button>request takeback</Button>
-            <Button>offer draw</Button>
-            <Button>resign</Button>
+            <Button style={{ width: '10vw', margin: '10px' }}>offer draw</Button>
+            <Button style={{ width: '10vw', margin: '10px' }}>resign</Button>
           </div>
         </div>
       </div>
