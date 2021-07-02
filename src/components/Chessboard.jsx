@@ -27,6 +27,7 @@ function ChessBoard(props) {
   const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
   // uncomment this later, testing UI against PC and it doesnt load vs computer when this code runs
   useEffect(() => {
+    console.log('useEffect');
     if (vsComputer) {
       setViewOnly(false);
     } else {
@@ -64,21 +65,22 @@ function ChessBoard(props) {
     }
   }, [code, color]);
 
-  const user1 = {
-    username: '-', address: '-', elo: 0, mins: 15, secs: 0, cs: 0,
+  const self = {
+    username: '-', address: '-', elo: '-', mins: 0, secs: 0, cs: 0,
   }; // centiseconds i.e. 0.01
-  const user2 = {
-    username: '-', address: '-', elo: 0, mins: 15, secs: 0, cs: 0,
+  const opponent = {
+    username: '-', address: '-', elo: '-', mins: 0, secs: 0, cs: 0,
   };
 
   function formatTime(user) {
     if (user.mins === 0) {
-      return user.secs.toString(10);
+      return `${user.secs.toString(10)}${user.secs < 30 ? `.${user.cs}` : ''}`;
     }
     return `${user.mins.toString(10)}:${user.secs.toString(10)}${user.secs === 0 ? '0' : ''}`;
   }
 
   const randomMove = () => {
+    console.log('randomMove');
     const moves = chess.moves({ verbose: true });
     const move = moves[Math.floor(Math.random() * moves.length)];
     if (moves.length > 0) {
@@ -91,6 +93,7 @@ function ChessBoard(props) {
   };
 
   const onMove = (from, to) => {
+    console.log(`onMove${from}${to}${fen}${color}`);
     const moves = chess.moves({ verbose: true });
     for (let i = 0, len = moves.length; i < len; i += 1) {
       if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
@@ -115,6 +118,7 @@ function ChessBoard(props) {
   };
 
   const promotion = (e) => {
+    console.log('promotion');
     const from = pendingMove[0];
     const to = pendingMove[1];
 
@@ -147,7 +151,7 @@ function ChessBoard(props) {
     };
   };
 
-  const boardsize = Math.round((Math.min(window.innerWidth, window.innerHeight) * 0.77) / 8) * 8;
+  const boardsize = Math.round((Math.min(window.innerWidth, window.innerHeight) * 0.91) / 8) * 8;
 
   // eslint-disable-next-line no-return-assign
   return (
@@ -157,22 +161,19 @@ function ChessBoard(props) {
     }}
     >
       <div id="everything">
-        <div id="chatbox">
+        {/* <div id="chatbox">
           <p>chat stuff goes here</p>
           <input id="textInput" />
+        </div> */}
+        <div id="log">
+          <ol>
+            <li>moves go here</li>
+          </ol>
         </div>
         <div id="chessboard">
           <Row>
             <Col span={12}>
               <section id="boardAndUserInfo">
-                <div className="user">
-                  <div className="userinfo">
-                    <div className="username">{user1.username}</div>
-                    <div className="userAddress">{user1.address}</div>
-                    <div className="elo">{user1.elo}</div>
-                  </div>
-                  <div id="user1Time" className="userTime">{formatTime(user1)}</div>
-                </div>
                 <div id="chessboard">
                   <Chessground
                     width={boardsize}
@@ -190,31 +191,34 @@ function ChessBoard(props) {
                     style={{ margin: '5%' }}
                   />
                 </div>
-                <div className="user">
-                  <div className="userinfo">
-                    <div className="username">{user2.username}</div>
-                    <div className="userAddress">{user2.address}</div>
-                    <div className="elo">{user2.elo}</div>
-                  </div>
-                  <div id="user1Time" className="userTime">{formatTime(user2)}</div>
-                </div>
+
               </section>
             </Col>
-
           </Row>
         </div>
-        <div id="logAndButtons">
-          <div id="log">
-            <ol>
-              <li>moves go here</li>
-            </ol>
+        <div id="dashboard">
+          <div className="user">
+            <div className="userinfo">
+              <div className="username">{self.username}</div>
+              <div className="userAddress">{self.address}</div>
+              <div className="elo">{self.elo}</div>
+            </div>
+            <div id="selfTime" className="userTime">{formatTime(self)}</div>
           </div>
-          <br />
           <div id="buttons">
             <Button style={{ width: '10vw', margin: '10px' }}>offer draw</Button>
             <Button style={{ width: '10vw', margin: '10px' }}>resign</Button>
           </div>
+          <div className="user">
+            <div className="userinfo">
+              <div className="username">{opponent.username}</div>
+              <div className="userAddress">{opponent.address}</div>
+              <div className="elo">{opponent.elo}</div>
+            </div>
+            <div id="opponentTime" className="userTime">{formatTime(opponent)}</div>
+          </div>
         </div>
+
       </div>
       <Modal visible={selectVisible} footer={null} closable={false} centered>
         <div style={{ textAlign: 'center', cursor: 'pointer' }}>

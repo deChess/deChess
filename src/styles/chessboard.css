@@ -1,25 +1,30 @@
+body {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
 .userTime {
     width: 120px;
     height: 60px;
     font-size: 30px;
-    color: white;
-    border: 3px solid white;
+    color: black;
+    border: 3px solid black;
     text-align: center;
     margin-top: 10px;
+    vertical-align: middle;
 }
 
 .username {
     font-size: 18px;
-    color: white;
+    color: black;
 }
 
 .userAddress {
     font-size: 16px;
-    color: white;
+    color: black;
 }
 
 .elo {
-    color: white;
+    color: black;
     font-size: 16px;
 }
 
@@ -27,7 +32,6 @@
     margin: 2%;
     margin-left: 5%;
     display: flex;
-    width: 200%;
     justify-content: space-between;
     list-style: none;
 }
@@ -37,7 +41,7 @@
     flex-direction: column;
 }
 
-#logAndButtons {
+#log {
     background-color: aliceblue;
     width: 22%;
     padding: 10px;
@@ -61,7 +65,7 @@
 
 #everything {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
 }
 
 #buttons {
@@ -73,6 +77,14 @@
     height: 0px;
 }
 
-#log {
-    width: 100%;
+#dashboard {
+    background-color: aliceblue;
+    display: flex;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 60px;
+    flex-direction: column;
+    height: 30%;
+    margin-top: 13%;
+    vertical-align: middle;
 }
