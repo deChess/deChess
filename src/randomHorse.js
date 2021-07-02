@@ -126,9 +126,3 @@ function buildAHorse(num) {
 
     return horse;
 }
-
-function testButtonFunction() {
-    let num = Math.random();
-    document.getElementById('horseGoesHere').innerHTML = buildAHorse(num);
-    document.getElementById('Layer_1').style.height = '70vh';
-}

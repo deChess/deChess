@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<body>
+    <style>
+        body {
+            background-color: grey;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            font-size: 20px;
+        }
+    </style>
+    
+    <script src='randomHorse.js'></script>
+    <div style="display: flex; flex-direction: column;">
+        <button style="margin: auto; margin-top: 3%; margin-bottom: 2%; width: 200px; height: 50px; font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; font-size: 20px;" onclick="testButtonFunction()">build a horse</button>
+        <p id='seed' style="margin: auto; margin-bottom: 20px; margin-top: 10px;"></p>
+        <div style="margin: auto;" id='horseGoesHere'></div>
+    </div>
+    <script>
+        function testButtonFunction() {
+            let num = Math.random();
+            document.getElementById('seed').innerHTML = 'seed: ' + num.toString(10);
+            document.getElementById('horseGoesHere').innerHTML = buildAHorse(num);
+            document.getElementById('Layer_1').style.height = '70vh';
+        }
+    </script>
+</body>
