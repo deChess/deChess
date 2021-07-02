@@ -9,7 +9,9 @@ import { ethers } from 'ethers';
 const StreamrClient = require('streamr-client');
 
 function NavBar(props) {
-  const { setClient, address, setAddress } = props;
+  const {
+    setClient, address, setAddress, setProvider,
+  } = props;
   const { ethereum } = window;
 
   return (
@@ -32,6 +34,7 @@ function NavBar(props) {
           setClient(client);
           const ensAddress = await provider.lookupAddress(ethereum.selectedAddress);
           setAddress(ensAddress || ethereum.selectedAddress);
+          setProvider(provider);
         }}
         style={{ position: 'absolute', top: 0, right: 0 }}
         key="Connect"
