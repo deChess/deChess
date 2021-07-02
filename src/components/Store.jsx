@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from 'antd';
 // import { ethers } from 'ethers';
+/* eslint-disable-next-line */
 import SVG from 'react-inlinesvg';
 import buildAHorse from '../randomHorse';
 
