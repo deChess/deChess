@@ -34,9 +34,9 @@ const horseParts = {
     base: '<path class="cls-1" d="M235.08,283V263.87a14.31,14.31,0,0,0-4.21-10.14,14.75,14.75,0,0,0-10.14-4.22H82a14.4,14.4,0,0,0-14.36,14.36v18.52H235.08V266.84" />'
 }
 
-console.log(num);
-
 function buildAHorse(num) {
+    console.log('');
+    console.log('seed: ' + num);
     num = num.toString(10);
 
     let color = 'white';
