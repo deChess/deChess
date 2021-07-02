@@ -128,13 +128,7 @@ function buildAHorse(num) {
 }
 
 function testButtonFunction() {
-    let horseImage = document.createElement('DIV');
     let num = Math.random();
-    horseImage.innerHTML = buildAHorse(num);
-    let im = document.getElementById('Layer_1');
-    if (typeof(im) != undefined && im != null) {
-        im.remove();
-    }
-    document.body.appendChild(horseImage);
+    document.getElementById('horseGoesHere').innerHTML = buildAHorse(num);
     document.getElementById('Layer_1').style.height = '70vh';
 }
