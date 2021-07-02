@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable linebreak-style */
 import React from 'react';
 import { Button } from 'antd';
