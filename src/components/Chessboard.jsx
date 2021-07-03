@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable linebreak-style */
 import React, { useState, useEffect } from 'react';
 import {
@@ -23,6 +24,34 @@ function ChessBoard(props) {
   const [isChecked, setChecked] = useState(false);
   const [viewOnly, setViewOnly] = useState(true);
   const [color, setColor] = useState();
+
+  function updateLog() {
+    const game = chess.pgn();
+    const gameArr = [];
+    const moveStarts = [];
+    for (let i = 0; i < game.length; i += 1) {
+      if (game[i] === '.') {
+        if (i < 10) {
+          moveStarts.push(i - 1);
+        } else if (i < 100) {
+          moveStarts.push(i - 2);
+        } else {
+          moveStarts.push(i - 3);
+        }
+      }
+    }
+    for (let i = 0; i < moveStarts.length; i += 1) {
+      if (i + 1 !== moveStarts.length) {
+        gameArr.push(game.slice(moveStarts[i], moveStarts[i + 1]));
+      } else {
+        gameArr.push(game.slice(moveStarts[i]));
+      }
+    }
+    const log = document.getElementById('innerLog');
+    log.scrollTop = log.scrollHeight;
+    log.innerHTML = `<p>${gameArr.join('</p><p>')}</p>`;
+    console.log(gameArr);
+  }
 
   const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
   // uncomment this later, testing UI against PC and it doesnt load vs computer when this code runs
@@ -63,6 +92,7 @@ function ChessBoard(props) {
         }
       });
     }
+    updateLog();
   }, [code, color]);
 
   const self = {
@@ -80,7 +110,6 @@ function ChessBoard(props) {
   }
 
   const randomMove = () => {
-    console.log('randomMove');
     const moves = chess.moves({ verbose: true });
     const move = moves[Math.floor(Math.random() * moves.length)];
     if (moves.length > 0) {
@@ -90,10 +119,10 @@ function ChessBoard(props) {
       setChecked(chess.in_check());
     }
     setViewOnly(false);
+    updateLog();
   };
 
   const onMove = (from, to) => {
-    console.log(`onMove${from}${to}${fen}${color}`);
     const moves = chess.moves({ verbose: true });
     for (let i = 0, len = moves.length; i < len; i += 1) {
       if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
@@ -115,6 +144,7 @@ function ChessBoard(props) {
         });
       }
     }
+    updateLog();
   };
 
   const promotion = (e) => {
@@ -135,6 +165,7 @@ function ChessBoard(props) {
         fen: chess.fen(),
       });
     }
+    updateLog();
   };
 
   const calcMovable = () => {
@@ -165,10 +196,8 @@ function ChessBoard(props) {
           <p>chat stuff goes here</p>
           <input id="textInput" />
         </div> */}
-        <div id="log">
-          <ol>
-            <li>moves go here</li>
-          </ol>
+        <div id="outerLog">
+          <div id="innerLog" />
         </div>
         <div id="chessboard">
           <Row>
@@ -186,6 +215,11 @@ function ChessBoard(props) {
                     highlight={{
                       check: true,
                       lastMove: true,
+                    }}
+                    premovable={{
+                      enabled: true,
+                      showDests: true,
+                      castle: true,
                     }}
                     check={isChecked}
                     style={{ margin: '5%' }}

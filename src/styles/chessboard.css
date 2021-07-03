@@ -41,13 +41,23 @@ body {
     flex-direction: column;
 }
 
-#log {
+#outerLog {
     background-color: aliceblue;
     width: 22%;
-    padding: 10px;
-    border-radius: 10px;
     margin: 60px;
-    padding: 10px;
+    border: 3px aliceblue;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#innerLog {
+    margin-top: 10%;
+    margin-bottom: 10%;
+    margin-left: 35%;
+    font-size: large;
+    background-color: aliceblue;
+    height: 77vh;
+    overflow-y: auto;
 }
 
 #chatbox {
