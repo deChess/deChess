@@ -53,7 +53,6 @@ function CreateModal(props) {
           } else {
             const msg = {
               hello: 'world',
-              random: Math.random(),
             };
 
             // Publish the event to the Stream

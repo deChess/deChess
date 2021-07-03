@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable linebreak-style */
 import React, { useState, useEffect } from 'react';
 import {
@@ -13,6 +12,8 @@ import queen from '../images/wQ.svg';
 import rook from '../images/wR.svg';
 import bishop from '../images/wB.svg';
 import knight from '../images/wN.svg';
+
+let doOnce = true;
 
 function ChessBoard(props) {
   const { settings: { vsComputer }, client, code } = props; // pass in time control here
@@ -50,13 +51,11 @@ function ChessBoard(props) {
     const log = document.getElementById('innerLog');
     log.scrollTop = log.scrollHeight;
     log.innerHTML = `<p>${gameArr.join('</p><p>')}</p>`;
-    console.log(gameArr);
   }
 
   const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
   // uncomment this later, testing UI against PC and it doesnt load vs computer when this code runs
   useEffect(() => {
-    console.log('useEffect');
     if (vsComputer) {
       setViewOnly(false);
     } else {
@@ -87,8 +86,15 @@ function ChessBoard(props) {
           } else {
             setViewOnly(true);
           }
-        } else if (message.hello === 'world') {
+        } else if (doOnce) {
+          const msg = {
+            hello: 'world',
+          };
+
+          // Publish the event to the Stream
+          client.publish(code, msg);
           setViewOnly(false);
+          doOnce = false;
         }
       });
     }
@@ -148,7 +154,6 @@ function ChessBoard(props) {
   };
 
   const promotion = (e) => {
-    console.log('promotion');
     const from = pendingMove[0];
     const to = pendingMove[1];
 
