@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable linebreak-style */
 import React, { useState, useEffect } from 'react';
 import {
@@ -24,9 +25,38 @@ function ChessBoard(props) {
   const [viewOnly, setViewOnly] = useState(true);
   const [color, setColor] = useState();
 
+  function updateLog() {
+    const game = chess.pgn();
+    const gameArr = [];
+    const moveStarts = [];
+    for (let i = 0; i < game.length; i += 1) {
+      if (game[i] === '.') {
+        if (i < 10) {
+          moveStarts.push(i - 1);
+        } else if (i < 100) {
+          moveStarts.push(i - 2);
+        } else {
+          moveStarts.push(i - 3);
+        }
+      }
+    }
+    for (let i = 0; i < moveStarts.length; i += 1) {
+      if (i + 1 !== moveStarts.length) {
+        gameArr.push(game.slice(moveStarts[i], moveStarts[i + 1]));
+      } else {
+        gameArr.push(game.slice(moveStarts[i]));
+      }
+    }
+    const log = document.getElementById('innerLog');
+    log.scrollTop = log.scrollHeight;
+    log.innerHTML = `<p>${gameArr.join('</p><p>')}</p>`;
+    console.log(gameArr);
+  }
+
   const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
   // uncomment this later, testing UI against PC and it doesnt load vs computer when this code runs
   useEffect(() => {
+    console.log('useEffect');
     if (vsComputer) {
       setViewOnly(false);
     } else {
@@ -62,18 +92,19 @@ function ChessBoard(props) {
         }
       });
     }
+    updateLog();
   }, [code, color]);
 
-  const user1 = {
-    username: '-', address: '-', elo: 0, mins: 15, secs: 0, cs: 0,
+  const self = {
+    username: '-', address: '-', elo: '-', mins: 0, secs: 0, cs: 0,
   }; // centiseconds i.e. 0.01
-  const user2 = {
-    username: '-', address: '-', elo: 0, mins: 15, secs: 0, cs: 0,
+  const opponent = {
+    username: '-', address: '-', elo: '-', mins: 0, secs: 0, cs: 0,
   };
 
   function formatTime(user) {
     if (user.mins === 0) {
-      return user.secs.toString(10);
+      return `${user.secs.toString(10)}${user.secs < 30 ? `.${user.cs}` : ''}`;
     }
     return `${user.mins.toString(10)}:${user.secs.toString(10)}${user.secs === 0 ? '0' : ''}`;
   }
@@ -88,6 +119,7 @@ function ChessBoard(props) {
       setChecked(chess.in_check());
     }
     setViewOnly(false);
+    updateLog();
   };
 
   const onMove = (from, to) => {
@@ -112,9 +144,11 @@ function ChessBoard(props) {
         });
       }
     }
+    updateLog();
   };
 
   const promotion = (e) => {
+    console.log('promotion');
     const from = pendingMove[0];
     const to = pendingMove[1];
 
@@ -131,6 +165,7 @@ function ChessBoard(props) {
         fen: chess.fen(),
       });
     }
+    updateLog();
   };
 
   const calcMovable = () => {
@@ -147,7 +182,7 @@ function ChessBoard(props) {
     };
   };
 
-  const boardsize = Math.round((Math.min(window.innerWidth, window.innerHeight) * 0.77) / 8) * 8;
+  const boardsize = Math.round((Math.min(window.innerWidth, window.innerHeight) * 0.91) / 8) * 8;
 
   // eslint-disable-next-line no-return-assign
   return (
@@ -157,22 +192,17 @@ function ChessBoard(props) {
     }}
     >
       <div id="everything">
-        <div id="chatbox">
+        {/* <div id="chatbox">
           <p>chat stuff goes here</p>
           <input id="textInput" />
+        </div> */}
+        <div id="outerLog">
+          <div id="innerLog" />
         </div>
         <div id="chessboard">
           <Row>
             <Col span={12}>
               <section id="boardAndUserInfo">
-                <div className="user">
-                  <div className="userinfo">
-                    <div className="username">{user1.username}</div>
-                    <div className="userAddress">{user1.address}</div>
-                    <div className="elo">{user1.elo}</div>
-                  </div>
-                  <div id="user1Time" className="userTime">{formatTime(user1)}</div>
-                </div>
                 <div id="chessboard">
                   <Chessground
                     width={boardsize}
@@ -186,35 +216,43 @@ function ChessBoard(props) {
                       check: true,
                       lastMove: true,
                     }}
+                    premovable={{
+                      enabled: true,
+                      showDests: true,
+                      castle: true,
+                    }}
                     check={isChecked}
                     style={{ margin: '5%' }}
                   />
                 </div>
-                <div className="user">
-                  <div className="userinfo">
-                    <div className="username">{user2.username}</div>
-                    <div className="userAddress">{user2.address}</div>
-                    <div className="elo">{user2.elo}</div>
-                  </div>
-                  <div id="user1Time" className="userTime">{formatTime(user2)}</div>
-                </div>
+
               </section>
             </Col>
-
           </Row>
         </div>
-        <div id="logAndButtons">
-          <div id="log">
-            <ol>
-              <li>moves go here</li>
-            </ol>
+        <div id="dashboard">
+          <div className="user">
+            <div className="userinfo">
+              <div className="username">{self.username}</div>
+              <div className="userAddress">{self.address}</div>
+              <div className="elo">{self.elo}</div>
+            </div>
+            <div id="selfTime" className="userTime">{formatTime(self)}</div>
           </div>
-          <br />
           <div id="buttons">
             <Button style={{ width: '10vw', margin: '10px' }}>offer draw</Button>
             <Button style={{ width: '10vw', margin: '10px' }}>resign</Button>
           </div>
+          <div className="user">
+            <div className="userinfo">
+              <div className="username">{opponent.username}</div>
+              <div className="userAddress">{opponent.address}</div>
+              <div className="elo">{opponent.elo}</div>
+            </div>
+            <div id="opponentTime" className="userTime">{formatTime(opponent)}</div>
+          </div>
         </div>
+
       </div>
       <Modal visible={selectVisible} footer={null} closable={false} centered>
         <div style={{ textAlign: 'center', cursor: 'pointer' }}>
