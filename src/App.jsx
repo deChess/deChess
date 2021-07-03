@@ -1,5 +1,5 @@
 /* eslint-disable linebreak-style */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout, { Content, Footer, Header } from 'antd/lib/layout/layout';
 import {
   Switch,
@@ -7,6 +7,7 @@ import {
   Redirect,
   useLocation,
 } from 'react-router-dom';
+import IPFS from 'ipfs-core';
 import ChessBoard from './components/Chessboard';
 import MainMenu from './components/MainMenu';
 import NavBar from './components/NavBar';
@@ -20,7 +21,10 @@ function App() {
   const [client, setClient] = useState();
   const [address, setAddress] = useState('');
   const [provider, setProvider] = useState();
-
+  const [ipfs, setIpfs] = useState();
+  useEffect(async () => {
+    setIpfs(await IPFS.create());
+  }, []);
   return (
     <Layout>
       {useLocation().pathname !== '/game' && (
@@ -43,7 +47,7 @@ function App() {
             background: '#2b313c',
           }}
           >
-            <Store provider={provider} />
+            <Store ipfs={ipfs} provider={provider} />
           </Content>
         </Route>
         <Route path="/play">
