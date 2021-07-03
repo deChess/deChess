@@ -1,11 +1,13 @@
 /* eslint-disable linebreak-style */
 import React from 'react';
-import { Button } from 'antd';
+import { Button, Typography } from 'antd';
 import { ethers } from 'ethers';
 import SVG from 'react-inlinesvg';
 import pinataSDK from '@pinata/sdk';
 import buildAHorse from '../randomHorse';
 import ERC721Rarible from '../ERC721Rarible.json';
+
+const { Title } = Typography;
 
 const pinata = pinataSDK(process.env.REACT_APP_PINIATA_KEY, process.env.REACT_APP_PINIATA_SECRET);
 
@@ -13,12 +15,12 @@ const contractAddress = '0x6ede7f3c26975aad32a475e1021d8f6f39c89d82';
 
 function Store(props) {
   const { provider, ipfs } = props;
-  const signer = provider.getSigner();
   const horse = buildAHorse(Math.random());
   const horse2 = buildAHorse(Math.random());
   const horse3 = buildAHorse(Math.random());
 
   const mint = async () => {
+    const signer = provider.getSigner();
     const selectedAddress = await signer.getAddress();
     const tokenId = await fetch(`https://api-staging.rarible.com/protocol/v0.1/ethereum/nft/collections/${contractAddress}/generate_token_id?minter=${selectedAddress}`);
     const contract = new ethers.Contract(contractAddress, ERC721Rarible.abi, signer);
@@ -48,15 +50,16 @@ function Store(props) {
   };
   return (
     <div style={{
-      height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-around',
+      height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex',
     }}
     >
+      <Title level={2} style={{ marginTop: 50, color: 'white' }}>Examples:</Title>
       <div style={{ display: 'flex' }}>
-        <SVG height={400} src={horse} />
-        <SVG height={400} src={horse2} />
-        <SVG height={400} src={horse3} />
+        <SVG width={350} src={horse} />
+        <SVG width={350} src={horse2} />
+        <SVG width={350} src={horse3} />
       </div>
-      <Button onClick={mint}>Mint a piece</Button>
+      <Button style={{ marginTop: 100 }} size="large" onClick={mint}>Mint a piece</Button>
     </div>
   );
 }
