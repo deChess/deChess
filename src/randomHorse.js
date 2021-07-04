@@ -117,11 +117,11 @@ export default function buildAHorse(num) {
             properties: {
                 'piece type': 'knight',
                 'color': color,
-                'ear type': ear,
-                'hair type': hair,
+                'ear type': ear.toString(10),
+                'hair type': hair.toString(10),
                 'hair color': hairColor,
                 'stripe color': lineColors,
-                'has horn': horn,
+                'has horn': horn ? 'yes' : 'no',
             }
         };
 }
