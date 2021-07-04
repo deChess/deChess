@@ -44,7 +44,6 @@ function Store(props) {
       attributes: properties,
     }));
     pinata.pinByHash(metaData.path);
-    console.log(metaData.path);
     const tokenIdJSON = await tokenId.json();
     const tx = await contract.mintAndTransfer(
       [
