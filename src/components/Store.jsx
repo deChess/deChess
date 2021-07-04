@@ -1,5 +1,5 @@
 /* eslint-disable linebreak-style */
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, Typography } from 'antd';
 import { ethers } from 'ethers';
 import SVG from 'react-inlinesvg';
@@ -13,6 +13,7 @@ const pinata = pinataSDK(process.env.REACT_APP_PINIATA_KEY, process.env.REACT_AP
 
 function Store(props) {
   const { provider, ipfs } = props;
+  const [transactionHash, setTransactionHash] = useState();
   const horse = buildAHorse(Math.random());
   const horse2 = buildAHorse(Math.random());
   const horse3 = buildAHorse(Math.random());
@@ -54,6 +55,7 @@ function Store(props) {
       ],
       selectedAddress,
     );
+    setTransactionHash(tx.hash);
     await tx.wait();
   };
   return (
@@ -68,6 +70,7 @@ function Store(props) {
         <SVG width={350} src={horse3.image} />
       </div>
       <Button style={{ marginTop: 100 }} size="large" onClick={mint}>Mint a piece</Button>
+      {transactionHash && <div style={{ color: 'white' }}>{`View transaction on: rinkeby.etherscan.io/tx/${transactionHash}`}</div>}
     </div>
   );
 }
