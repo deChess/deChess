@@ -11,8 +11,6 @@ const { Title } = Typography;
 
 const pinata = pinataSDK(process.env.REACT_APP_PINIATA_KEY, process.env.REACT_APP_PINIATA_SECRET);
 
-const contractAddress = '0x6ede7f3c26975aad32a475e1021d8f6f39c89d82';
-
 function Store(props) {
   const { provider, ipfs } = props;
   const horse = buildAHorse(Math.random());
@@ -20,9 +18,19 @@ function Store(props) {
   const horse3 = buildAHorse(Math.random());
 
   const mint = async () => {
+    const { name } = await provider.getNetwork();
     const signer = provider.getSigner();
     const selectedAddress = await signer.getAddress();
-    const tokenId = await fetch(`https://api-staging.rarible.com/protocol/v0.1/ethereum/nft/collections/${contractAddress}/generate_token_id?minter=${selectedAddress}`);
+    let contractAddress;
+    let tokenId;
+    if (name === 'rinkeby') {
+      contractAddress = '0x6ede7f3c26975aad32a475e1021d8f6f39c89d82';
+      tokenId = await fetch(`https://api-staging.rarible.com/protocol/v0.1/ethereum/nft/collections/${contractAddress}/generate_token_id?minter=${selectedAddress}`);
+    } else if (name === 'homestead') {
+      contractAddress = '0xF6793dA657495ffeFF9Ee6350824910Abc21356C';
+      tokenId = await fetch(`https://api.rarible.com/protocol/v0.1/ethereum/nft/collections/${contractAddress}/generate_token_id?minter=${selectedAddress}`);
+    }
+
     const contract = new ethers.Contract(contractAddress, ERC721Rarible.abi, signer);
     const horseToMint = buildAHorse(Math.random());
     const ipfsHorseUpload = await ipfs.add(horseToMint.image);
