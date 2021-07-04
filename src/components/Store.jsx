@@ -25,14 +25,14 @@ function Store(props) {
     const tokenId = await fetch(`https://api-staging.rarible.com/protocol/v0.1/ethereum/nft/collections/${contractAddress}/generate_token_id?minter=${selectedAddress}`);
     const contract = new ethers.Contract(contractAddress, ERC721Rarible.abi, signer);
     const horseToMint = buildAHorse(Math.random());
-    const ipfsHorseUpload = await ipfs.add(horseToMint);
+    const ipfsHorseUpload = await ipfs.add(horseToMint.image);
     pinata.pinByHash(ipfsHorseUpload.path);
     const metaData = await ipfs.add(JSON.stringify({
       description: 'metadata for chess piece',
       external_url: 'dechess.nft',
       image: `ipfs://ipfs/${ipfsHorseUpload.path}`,
       name: 'Chess Piece Horse',
-      attributes: { hair: 'blue' },
+      attributes: horseToMint.properties,
     }));
     pinata.pinByHash(metaData.path);
     const tokenIdJSON = await tokenId.json();
@@ -55,9 +55,9 @@ function Store(props) {
     >
       <Title level={2} style={{ marginTop: 50, color: 'white' }}>Examples:</Title>
       <div style={{ display: 'flex' }}>
-        <SVG width={350} src={horse} />
-        <SVG width={350} src={horse2} />
-        <SVG width={350} src={horse3} />
+        <SVG width={350} src={horse.image} />
+        <SVG width={350} src={horse2.image} />
+        <SVG width={350} src={horse3.image} />
       </div>
       <Button style={{ marginTop: 100 }} size="large" onClick={mint}>Mint a piece</Button>
     </div>
