@@ -43,7 +43,7 @@ function App() {
         </Route>
         <Route path="/store">
           <Content style={{
-            height: 'calc(100vh - 70px - 64px)',
+            height: '1000px',
             background: '#2b313c',
           }}
           >
