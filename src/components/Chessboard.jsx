@@ -202,36 +202,42 @@ function ChessBoard(props) {
           <input id="textInput" />
         </div> */}
         <div id="outerLog">
+          <p style={{
+            fontSize: '20px',
+            margin: '15px',
+            textAlign: 'center',
+          }}
+          >
+            Moves
+          </p>
           <div id="innerLog" />
+          <p style={{ margin: '10px' }} />
         </div>
         <div id="chessboard">
           <Row>
             <Col span={12}>
-              <section id="boardAndUserInfo">
-                <div id="chessboard">
-                  <Chessground
-                    width={boardsize}
-                    height={boardsize}
-                    turnColor={turnColor()}
-                    movable={calcMovable()}
-                    lastMove={lastMove}
-                    fen={fen}
-                    onMove={onMove}
-                    highlight={{
-                      check: true,
-                      lastMove: true,
-                    }}
-                    premovable={{
-                      enabled: true,
-                      showDests: true,
-                      castle: true,
-                    }}
-                    check={isChecked}
-                    style={{ margin: '5%' }}
-                  />
-                </div>
-
-              </section>
+              <div id="chessboard">
+                <Chessground
+                  width={boardsize}
+                  height={boardsize}
+                  turnColor={turnColor()}
+                  movable={calcMovable()}
+                  lastMove={lastMove}
+                  fen={fen}
+                  onMove={onMove}
+                  highlight={{
+                    check: true,
+                    lastMove: true,
+                  }}
+                  premovable={{
+                    enabled: true,
+                    showDests: true,
+                    castle: true,
+                  }}
+                  check={isChecked}
+                  style={{ margin: '5%' }}
+                />
+              </div>
             </Col>
           </Row>
         </div>

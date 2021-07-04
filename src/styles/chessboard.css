@@ -45,19 +45,20 @@ body {
     background-color: aliceblue;
     width: 22%;
     margin: 60px;
+    margin-top: 8%;
     border: 3px aliceblue;
     border-radius: 10px;
+    height: 70vh;
     overflow: hidden;
 }
 
 #innerLog {
-    margin-top: 10%;
-    margin-bottom: 10%;
-    margin-left: 35%;
+    margin-bottom: 30px;
     font-size: large;
     background-color: aliceblue;
-    height: 77vh;
+    height: 70vh;
     overflow-y: auto;
+    text-align: center;
 }
 
 #chatbox {
@@ -95,6 +96,6 @@ body {
     margin: 60px;
     flex-direction: column;
     height: 30%;
-    margin-top: 13%;
+    margin-top: 16.5%;
     vertical-align: middle;
 }

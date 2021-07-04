@@ -102,17 +102,26 @@ export default function buildAHorse(num) {
         lineColors += chars[numArr[i]];
     }
 
-    return `<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
-                ${horseParts.backEars(ear)}
-                ${horn ? horseParts.horn() : ''}
-                ${horseParts.hair(hairColor, hair)}
-                ${horseParts.body()}
-                ${horseParts.base()}
-                ${horseParts.frontEars(ear)}
-                ${horseParts.eye()}
-                ${horseParts.nostril()}
-                ${horseParts.stripes(lineColors)}
-                <!--seed: ${num}, color: ${color}, hair color: ${hairColor}, accent colors: ${lineColors}, horn: ${horn}, ear type: ${ear}, hair type: ${hair} -->
-            </svg>
-            `;
+    return {image: `<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+                    ${horseParts.backEars(ear)}
+                    ${horn ? horseParts.horn() : ''}
+                    ${horseParts.hair(hairColor, hair)}
+                    ${horseParts.body()}
+                    ${horseParts.base()}
+                    ${horseParts.frontEars(ear)}
+                    ${horseParts.eye()}
+                    ${horseParts.nostril()}
+                    ${horseParts.stripes(lineColors)}
+                    <!--seed: ${num}, color: ${color}, hair color: ${hairColor}, accent colors: ${lineColors}, horn: ${horn}, ear type: ${ear}, hair type: ${hair} -->
+                </svg>`,
+            properties: {
+                'piece type': 'knight',
+                'color': color,
+                'ear type': ear,
+                'hair type': hair,
+                'hair color': hairColor,
+                'stripe color': lineColors,
+                'has horn': horn,
+            }
+        };
 }
