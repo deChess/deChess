@@ -1,4 +1,7 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable eqeqeq */
 import React, { useState } from 'react';
 import { Button } from 'antd';
 import { ethers } from 'ethers';
@@ -6,6 +9,9 @@ import SVG from 'react-inlinesvg';
 import pinataSDK from '@pinata/sdk';
 import buildAHorse from '../randomHorse';
 import ERC721Rarible from '../ERC721Rarible.json';
+import VRF from '../VRF.json';
+import controller from '../controller.json';
+import gammaAbi from '../gamma.json';
 import blackKingImage from '../images/pieces/hackmoney/bK.svg';
 import blackHorseImage from '../images/pieces/hackmoney/bN.svg';
 import blackQueenImage from '../images/pieces/hackmoney/bQ.svg';
@@ -14,10 +20,11 @@ import whiteHorseImage from '../images/pieces/hackmoney/wN.svg';
 import whiteQueenImage from '../images/pieces/hackmoney/wQ.svg';
 
 const pinata = pinataSDK(process.env.REACT_APP_PINIATA_KEY, process.env.REACT_APP_PINIATA_SECRET);
-
+const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 function Store(props) {
   const { provider, ipfs } = props;
   const [transactionHash, setTransactionHash] = useState();
+  const [loading, setLoading] = useState();
 
   const mint = async (svg, properties) => {
     const { name } = await provider.getNetwork();
@@ -31,9 +38,10 @@ function Store(props) {
     } else if (name === 'homestead') {
       contractAddress = '0xF6793dA657495ffeFF9Ee6350824910Abc21356C';
       tokenId = await fetch(`https://api.rarible.com/protocol/v0.1/ethereum/nft/collections/${contractAddress}/generate_token_id?minter=${selectedAddress}`);
+    } else if (name === 'maticmum') {
+      contractAddress = '0x22a54F943033528f670258CDc68839CC533aAe1c';
     }
 
-    const contract = new ethers.Contract(contractAddress, ERC721Rarible.abi, signer);
     const ipfsHorseUpload = await ipfs.add(svg);
     pinata.pinByHash(ipfsHorseUpload.path);
     const metaData = await ipfs.add(JSON.stringify({
@@ -44,19 +52,32 @@ function Store(props) {
       attributes: properties,
     }));
     pinata.pinByHash(metaData.path);
-    const tokenIdJSON = await tokenId.json();
-    const tx = await contract.mintAndTransfer(
-      [
-        tokenIdJSON.tokenId,
-        `/ipfs/${metaData.path}`,
-        [[selectedAddress, 10000]], // You can assign creators, but the value must
-        [], // Royalties are set as basis, so 1000 = 10%.
-        ['0x'],
-      ],
-      selectedAddress,
-    );
-    setTransactionHash(tx.hash);
-    await tx.wait();
+    if (name !== 'maticmum') {
+      const tokenIdJSON = await tokenId.json();
+      const contract = new ethers.Contract(contractAddress, ERC721Rarible.abi, signer);
+      const tx = await contract.mintAndTransfer(
+        [
+          tokenIdJSON.tokenId,
+          `/ipfs/${metaData.path}`,
+          [[selectedAddress, 10000]], // You can assign creators, but the value must
+          [], // Royalties are set as basis, so 1000 = 10%.
+          ['0x'],
+        ],
+        selectedAddress,
+      );
+      setTransactionHash(name === 'rinkeby' ? `rinkeby.etherscan.com/tx/${tx.hash}` : `etherscan.com/tx/${tx.hash}`);
+      await tx.wait();
+    } else {
+      const contract = new ethers.Contract(contractAddress, controller, signer);
+      await contract.mint(0, `ipfs://ipfs/${metaData.path}`, 1, selectedAddress, 0, [], []);
+
+      const gamma = contract.gamma();
+      const gammaContract = new ethers.Contract(gamma, gammaAbi, signer);
+      const gammaTokenId = BigInt(await gammaContract.totalSupply());
+      const gammaTx = await gammaContract.purchase(gammaTokenId);
+      setTransactionHash(`mumbai.polygonscan.com/tx/${gammaTx.hash}`);
+      await gammaTx.wait();
+    }
   };
   return (
     <div style={{
@@ -166,15 +187,39 @@ function Store(props) {
       <Button
         style={{ marginTop: 100 }}
         size="large"
-        onClick={() => {
-          const randoHorse = buildAHorse(Math.random());
+        onClick={async () => {
+          const { name } = await provider.getNetwork();
+          let VRFContractAddress;
+          let randomNumber;
+          if (name === 'maticmum') {
+            VRFContractAddress = '0xf8B00745E4108eC18ee3a97f304F49af2C367EdA';
+            const signer = provider.getSigner();
+            // const selectedAddress = await signer.getAddress();
+            const priceFeedInstance = await new ethers.Contract(
+              VRFContractAddress, VRF, signer,
+            );
+            const oldResult = BigInt(await priceFeedInstance.randomResult());
+            let result = BigInt(await priceFeedInstance.randomResult());
+            await priceFeedInstance.getRandomNumber();
+            setLoading('Loading...');
+            while (result === oldResult) {
+              result = BigInt(await priceFeedInstance.randomResult());
+              await timer(3000);
+            }
+            setLoading(null);
+            randomNumber = result;
+          } else {
+            randomNumber = Math.random();
+          }
+          const randoHorse = buildAHorse(randomNumber);
           mint(randoHorse.image, randoHorse.properties);
         }}
       >
         Mint a random horse piece
 
       </Button>
-      {transactionHash && <div style={{ color: 'white' }}>{`View transaction on: rinkeby.etherscan.io/tx/${transactionHash}`}</div>}
+      {transactionHash && <div style={{ color: 'white' }}>{`View transaction on: ${transactionHash}`}</div>}
+      {loading && <div style={{ color: 'white' }}>{loading}</div>}
     </div>
   );
 }

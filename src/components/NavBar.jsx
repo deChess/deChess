@@ -1,4 +1,5 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable no-empty */
 import React from 'react';
 import { Menu } from 'antd';
 import {
@@ -36,7 +37,11 @@ function NavBar(props) {
             publishWithSignature: 'never',
           });
           setClient(client);
-          const ensAddress = await provider.lookupAddress(ethereum.selectedAddress);
+          let ensAddress;
+          try {
+            ensAddress = await provider.lookupAddress(ethereum.selectedAddress);
+          } catch (err) {
+          }
           setAddress(ensAddress || ethereum.selectedAddress);
           setProvider(provider);
         }}
