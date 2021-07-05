@@ -3,7 +3,7 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable eqeqeq */
 import React, { useState } from 'react';
-import { Button } from 'antd';
+import { Button, Typography } from 'antd';
 import { ethers } from 'ethers';
 import SVG from 'react-inlinesvg';
 import pinataSDK from '@pinata/sdk';
@@ -19,13 +19,17 @@ import whiteKingImage from '../images/pieces/hackmoney/wK.svg';
 import whiteHorseImage from '../images/pieces/hackmoney/wN.svg';
 import whiteQueenImage from '../images/pieces/hackmoney/wQ.svg';
 
+const { Title } = Typography;
+
 const pinata = pinataSDK(process.env.REACT_APP_PINIATA_KEY, process.env.REACT_APP_PINIATA_SECRET);
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 function Store(props) {
   const { provider, ipfs } = props;
   const [transactionHash, setTransactionHash] = useState();
   const [loading, setLoading] = useState();
-
+  const horse = buildAHorse(Math.random());
+  const horse2 = buildAHorse(Math.random());
+  const horse3 = buildAHorse(Math.random());
   const mint = async (svg, properties) => {
     const { name } = await provider.getNetwork();
     const signer = provider.getSigner();
@@ -184,6 +188,12 @@ function Store(props) {
           </Button>
         </div>
       </div>
+      <Title style={{ color: 'white', marginTop: '50px' }}>Examples of random horse:</Title>
+      <div style={{ display: 'flex' }}>
+        <SVG width={350} src={horse.image} />
+        <SVG width={350} src={horse2.image} />
+        <SVG width={350} src={horse3.image} />
+      </div>
       <Button
         style={{ marginTop: 100 }}
         size="large"
@@ -194,8 +204,7 @@ function Store(props) {
           if (name === 'maticmum') {
             VRFContractAddress = '0xf8B00745E4108eC18ee3a97f304F49af2C367EdA';
             const signer = provider.getSigner();
-            // const selectedAddress = await signer.getAddress();
-            const priceFeedInstance = await new ethers.Contract(
+            const priceFeedInstance = new ethers.Contract(
               VRFContractAddress, VRF, signer,
             );
             const oldResult = BigInt(await priceFeedInstance.randomResult());
