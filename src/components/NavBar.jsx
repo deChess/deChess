@@ -33,6 +33,7 @@ function NavBar(props) {
           await window.ethereum.enable();
           const provider = new ethers.providers.Web3Provider(ethereum);
           provider.getSigner();
+          await provider.send('eth_requestAccounts', []);
           const client = await new StreamrClient({
             // restUrl: 'http://localhost/api/v1', // if you want to test locally in the streamr-docker-dev environment
             auth: { ethereum },
