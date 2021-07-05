@@ -30,7 +30,9 @@ function NavBar(props) {
             setAddress('wallet not signed in');
             return;
           }
+          await window.ethereum.enable();
           const provider = new ethers.providers.Web3Provider(ethereum);
+          provider.getSigner();
           const client = await new StreamrClient({
             // restUrl: 'http://localhost/api/v1', // if you want to test locally in the streamr-docker-dev environment
             auth: { ethereum },
