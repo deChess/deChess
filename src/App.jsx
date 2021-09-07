@@ -12,6 +12,7 @@ import ChessBoard from './components/Chessboard';
 import MainMenu from './components/MainMenu';
 import NavBar from './components/NavBar';
 import Store from './components/Store';
+import Collection from './components/Collection';
 import 'antd/dist/antd.css';
 import './App.css';
 
@@ -67,6 +68,11 @@ function App() {
         </Route>
         <Route path="/game">
           <ChessBoard code={code} client={client} settings={settings} />
+        </Route>
+        <Route path="/collection">
+          <Content>
+            <Collection />
+          </Content>
         </Route>
 
         <Route path="/404">

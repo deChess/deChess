@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <!-- Moralis SDK code -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
+  </head>
+  <body>
+    <h1>Gas Stats With Moralis</h1>
+
+    <script>
+      // connect to Moralis server
+      Moralis.initialize("8X72obW9xkhxyvk00BuQuJBR1R60KfxrtHIBJdAJ");
+      Moralis.serverURL = "https://dytrxturshw9.moralis.io:2053/server";
+
+      async function getNFTsFromChain() {
+        const options = { chain: 'mumbai', address: '0x14a89b696ced1ca0e94956485290739db74cdb07' };
+        const NFTs = await Moralis.Web3.getNFTs(options);
+        return NFTs;
+      }
+      getNFTsFromChain().then((NFTs) => {
+        const myNFTs = NFTs;
+      });
+
+    </script>
+  </body>
+</html>

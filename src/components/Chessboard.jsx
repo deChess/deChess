@@ -1,5 +1,6 @@
 /* eslint-disable linebreak-style */
-import React, { useState, useEffect } from 'react';
+/* eslint-disable no-unused-vars */
+import React, { useState, useEffect, Component } from 'react';
 import {
   Button, Col, Modal, Row,
 } from 'antd';
@@ -8,10 +9,16 @@ import Chessground from 'react-chessground';
 import 'react-chessground/dist/styles/chessground.css'; // redundant import, but freaks out if i dont import this for whatever reason
 import '../styles/chessground.css'; // overwrites previous chessground.css, allows easier/more customizability
 import '../styles/chessboard.css'; // this one is for the buttons and text that aren't part of the board
+import { connect } from 'react-redux';
+import styled from 'styled-components';
+import PropTypes from 'prop-types';
+import { bindActionCreators } from 'redux';
 import queen from '../images/wQ.svg';
 import rook from '../images/wR.svg';
 import bishop from '../images/wB.svg';
 import knight from '../images/wN.svg';
+import Clock from './clock';
+import * as clockActions from '../actions';
 
 let doOnce = true;
 
@@ -81,6 +88,7 @@ function ChessBoard(props) {
               setFen(chess.fen());
               setLastMove([from, to]);
               setChecked(chess.in_check());
+              updateLog();
             }
             setViewOnly(false);
           } else {
