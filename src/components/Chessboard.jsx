@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React, { useState, useEffect /* , Component */ } from 'react';
 import {
   Button, Col, Modal, Row,
@@ -132,16 +131,16 @@ function ChessBoard(props) {
     const chessClock = setInterval(() => {
       const homeTime = document.getElementById('homeTime');
       const opponentTime = document.getElementById('opponentTime');
-      console.log(`opponent time: ${opponent.time}, home time: ${home.time}`);
+      // console.log(`opponent time: ${opponent.time}, home time: ${home.time}`);
       if (homeTime != null && opponentTime != null) {
         if (viewOnly === true) {
           opponent.time -= 100;
           document.getElementById('homeTime').innerHTML = formatTime(opponent.time);
-          console.log(`viewOnly True ${viewOnly}`);
+          // console.log(`viewOnly True ${viewOnly}`);
         } else if (viewOnly === false) {
           home.time -= 100;
           document.getElementById('opponentTime').innerHTML = formatTime(home.time);
-          console.log(`viewOnly False ${viewOnly}`);
+          // console.log(`viewOnly False ${viewOnly}`);
         }
       }
     }, 100);
