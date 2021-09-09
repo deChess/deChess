@@ -1,6 +1,5 @@
-/* eslint-disable linebreak-style */
-/* eslint-disable no-unused-vars */
-import React, { useState, useEffect, Component } from 'react';
+/* eslint-disable no-console */
+import React, { useState, useEffect /* , Component */ } from 'react';
 import {
   Button, Col, Modal, Row,
 } from 'antd';
@@ -9,18 +8,25 @@ import Chessground from 'react-chessground';
 import 'react-chessground/dist/styles/chessground.css'; // redundant import, but freaks out if i dont import this for whatever reason
 import '../styles/chessground.css'; // overwrites previous chessground.css, allows easier/more customizability
 import '../styles/chessboard.css'; // this one is for the buttons and text that aren't part of the board
-import { connect } from 'react-redux';
+/* import { connect } from 'react-redux';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { bindActionCreators } from 'redux';
+import { bindActionCreators } from 'redux'; */
 import queen from '../images/wQ.svg';
 import rook from '../images/wR.svg';
 import bishop from '../images/wB.svg';
 import knight from '../images/wN.svg';
-import Clock from './clock';
-import * as clockActions from '../actions';
+// import Clock from './clock';
+// import * as clockActions from '../actions';
 
 let doOnce = true;
+
+const home = {
+  username: '-', address: '-', elo: '-', time: 600000, turn: true,
+}; // centiseconds i.e. 0.01
+const opponent = {
+  username: '-', address: '-', elo: '-', time: 600000, turn: false,
+};
 
 function ChessBoard(props) {
   const { settings: { vsComputer }, client, code } = props; // pass in time control here
@@ -61,7 +67,6 @@ function ChessBoard(props) {
   }
 
   const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
-  // uncomment this later, testing UI against PC and it doesnt load vs computer when this code runs
   useEffect(() => {
     if (vsComputer) {
       setViewOnly(false);
@@ -109,19 +114,39 @@ function ChessBoard(props) {
     updateLog();
   }, [code, color]);
 
-  const self = {
-    username: '-', address: '-', elo: '-', mins: 0, secs: 0, cs: 0,
-  }; // centiseconds i.e. 0.01
-  const opponent = {
-    username: '-', address: '-', elo: '-', mins: 0, secs: 0, cs: 0,
+  const formatTime = (msecs) => {
+    const tenth = parseInt((msecs / 100) % 10, 10);
+    let secs = parseInt((msecs / 1000) % 60, 10);
+    let mins = parseInt((msecs / 60000) /* % 60 */, 10);
+    // let hours = parseInt((msecs / 3600000), 10);
+
+    // hours = hours < 10 ? `0${hours}` : hours;
+    mins = mins < 10 ? `0${mins}` : mins;
+    secs = secs < 10 ? `0${secs}` : secs;
+
+    // return `${hours}:${mins}:${secs}.${tenth}`;
+    return `${mins}:${secs}.${tenth}`;
   };
 
-  function formatTime(user) {
-    if (user.mins === 0) {
-      return `${user.secs.toString(10)}${user.secs < 30 ? `.${user.cs}` : ''}`;
-    }
-    return `${user.mins.toString(10)}:${user.secs.toString(10)}${user.secs === 0 ? '0' : ''}`;
-  }
+  useEffect(() => {
+    const chessClock = setInterval(() => {
+      const homeTime = document.getElementById('homeTime');
+      const opponentTime = document.getElementById('opponentTime');
+      console.log(`opponent time: ${opponent.time}, home time: ${home.time}`);
+      if (homeTime != null && opponentTime != null) {
+        if (viewOnly === true) {
+          opponent.time -= 100;
+          document.getElementById('homeTime').innerHTML = formatTime(opponent.time);
+          console.log(`viewOnly True ${viewOnly}`);
+        } else if (viewOnly === false) {
+          home.time -= 100;
+          document.getElementById('opponentTime').innerHTML = formatTime(home.time);
+          console.log(`viewOnly False ${viewOnly}`);
+        }
+      }
+    }, 100);
+    return () => clearInterval(chessClock);
+  });
 
   const randomMove = () => {
     const moves = chess.moves({ verbose: true });
@@ -252,11 +277,11 @@ function ChessBoard(props) {
         <div id="dashboard">
           <div className="user">
             <div className="userinfo">
-              <div className="username">{self.username}</div>
-              <div className="userAddress">{self.address}</div>
-              <div className="elo">{self.elo}</div>
+              <div className="username">{home.username}</div>
+              <div className="userAddress">{home.address}</div>
+              <div className="elo">{home.elo}</div>
             </div>
-            <div id="selfTime" className="userTime">{formatTime(self)}</div>
+            <div id="homeTime" className="userTime">{formatTime(home.time)}</div>
           </div>
           <div id="buttons">
             <Button style={{ width: '10vw', margin: '10px' }}>offer draw</Button>
@@ -268,7 +293,7 @@ function ChessBoard(props) {
               <div className="userAddress">{opponent.address}</div>
               <div className="elo">{opponent.elo}</div>
             </div>
-            <div id="opponentTime" className="userTime">{formatTime(opponent)}</div>
+            <div id="opponentTime" className="userTime">{formatTime(opponent.time)}</div>
           </div>
         </div>
 
