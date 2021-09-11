@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { useState, useEffect /* , Component */ } from 'react';
 import {
   Button, Col, Modal, Row,
@@ -11,6 +12,7 @@ import '../styles/chessboard.css'; // this one is for the buttons and text that 
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux'; */
+// import { start } from 'ipfs-core/src/components/network';
 import queen from '../images/wQ.svg';
 import rook from '../images/wR.svg';
 import bishop from '../images/wB.svg';
@@ -28,7 +30,11 @@ const opponent = {
 };
 
 function ChessBoard(props) {
-  const { settings: { vsComputer }, client, code } = props; // pass in time control here
+  // eslint-disable-next-line no-unused-vars
+  const { settings: { vsComputer, startColor }, client, code } = props;
+  // eslint-disable-next-line no-console
+  // console.log(vsComputer);
+  // console.log(startColor);
   const [chess] = useState(new Chess());
   const [pendingMove, setPendingMove] = useState();
   const [selectVisible, setSelectVisible] = useState(false);
@@ -36,7 +42,9 @@ function ChessBoard(props) {
   const [lastMove, setLastMove] = useState();
   const [isChecked, setChecked] = useState(false);
   const [viewOnly, setViewOnly] = useState(true);
-  const [color, setColor] = useState();
+  const [color, setColor] = useState(startColor);
+  // eslint-disable-next-line no-unused-vars
+  const [orientation, setOrientation] = useState(startColor);
 
   function updateLog() {
     const game = chess.pgn();
@@ -65,7 +73,10 @@ function ChessBoard(props) {
     log.innerHTML = `<p>${gameArr.join('</p><p>')}</p>`;
   }
 
+  // eslint-disable-next-line no-unused-vars
+  const flipBoard = () => (orientation === 'white' ? 'black' : 'white');
   const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
+
   useEffect(() => {
     if (vsComputer) {
       setViewOnly(false);
@@ -129,18 +140,17 @@ function ChessBoard(props) {
 
   useEffect(() => {
     const chessClock = setInterval(() => {
+      // console.log(turnColor(), startColor, turnColor() === startColor);
       const homeTime = document.getElementById('homeTime');
       const opponentTime = document.getElementById('opponentTime');
       // console.log(`opponent time: ${opponent.time}, home time: ${home.time}`);
-      if (homeTime != null && opponentTime != null) {
-        if (viewOnly === true) {
-          opponent.time -= 100;
-          document.getElementById('homeTime').innerHTML = formatTime(opponent.time);
-          // console.log(`viewOnly True ${viewOnly}`);
-        } else if (viewOnly === false) {
+      if (homeTime != null && opponentTime != null && !doOnce) {
+        if (turnColor() === startColor) {
           home.time -= 100;
-          document.getElementById('opponentTime').innerHTML = formatTime(home.time);
-          // console.log(`viewOnly False ${viewOnly}`);
+          homeTime.innerHTML = formatTime(home.time);
+        } else {
+          opponent.time -= 100;
+          opponentTime.innerHTML = formatTime(opponent.time);
         }
       }
     }, 100);
@@ -268,6 +278,7 @@ function ChessBoard(props) {
                   }}
                   check={isChecked}
                   style={{ margin: '5%' }}
+                  orientation={orientation}
                 />
               </div>
             </Col>
@@ -283,8 +294,9 @@ function ChessBoard(props) {
             <div id="homeTime" className="userTime">{formatTime(home.time)}</div>
           </div>
           <div id="buttons">
-            <Button style={{ width: '10vw', margin: '10px' }}>offer draw</Button>
-            <Button style={{ width: '10vw', margin: '10px' }}>resign</Button>
+            <Button style={{ width: '9vw', margin: '10px' }}>offer draw</Button>
+            <Button style={{ width: '3vw', margin: '10px' }} type="primary"/* onClick={setOrientation(flipBoard())} */>🔄</Button>
+            <Button style={{ width: '9vw', margin: '10px' }}>resign</Button>
           </div>
           <div className="user">
             <div className="userinfo">

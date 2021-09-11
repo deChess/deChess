@@ -59,6 +59,7 @@ function CreateModal(props) {
             await client.publish(code, msg);
             setSettings({
               vsComputer: false,
+              startColor: 'white',
             });
             if (code !== '') {
               history.push('/game');

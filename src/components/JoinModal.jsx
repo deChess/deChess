@@ -33,6 +33,7 @@ function CreateModal(props) {
             await client.publish(code, msg);
             setSettings({
               vsComputer: false,
+              startColor: 'black', // black if joining a game
             });
             if (code !== '') {
               history.push('/game');
