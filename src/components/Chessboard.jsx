@@ -144,6 +144,7 @@ function ChessBoard(props) {
   };
 
   // chess clock
+  const clockInterval = 200;
   useEffect(() => {
     const start = Date.now();
     const chessClock = setInterval(() => {
@@ -154,14 +155,14 @@ function ChessBoard(props) {
       // console.log(`opponent time: ${opponent.time}, home time: ${home.time}`);
       if (homeTime != null && opponentTime != null && !doOnce) {
         if (turnColor() === startColor) { // decrease own time if own turn
-          home.time -= 100;
+          home.time -= clockInterval;
           homeTime.innerHTML = formatTime(home.time);
         } else { // decrease opponent time if opponent turn
-          opponent.time -= 100;
+          opponent.time -= clockInterval;
           opponentTime.innerHTML = formatTime(opponent.time);
         }
       }
-    }, 100 - (start - Date.now()));
+    }, clockInterval - (start - Date.now()));
     return () => clearInterval(chessClock);
   });
 
