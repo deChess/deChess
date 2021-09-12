@@ -32,8 +32,11 @@ function CreateModal(props) {
               ensDecoded = friendAddress;
             }
             try {
-              const stream = await client.getOrCreateStream({
-                id: `${address}/game`, // or 0x1234567890123456789012345678901234567890/foo/bar or mydomain.eth/foo/bar
+              const currTime = Date.now();
+              const stream = await client.createStream({
+                // id: `${address}/game`,
+                // game ID is starting time of game
+                id: `${address}/${currTime}`, // or address/foo/bar or mydomain.eth/foo/bar
               });
               if (!(await stream.hasPermission('stream_get', ensDecoded))) {
                 await stream.grantPermission('stream_get', ensDecoded);

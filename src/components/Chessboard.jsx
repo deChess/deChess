@@ -78,6 +78,10 @@ function ChessBoard(props) {
   const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
 
   useEffect(() => {
+    if (doOnce && startColor === 'black') {
+      setViewOnly(true);
+    }
+
     if (vsComputer) {
       setViewOnly(false);
     } else {
@@ -86,7 +90,6 @@ function ChessBoard(props) {
       },
       (message) => {
         // This function will be called when new messages occur
-
         if (message.hello !== 'world') {
           if (color !== turnColor()) {
             const { move } = message;
@@ -116,7 +119,9 @@ function ChessBoard(props) {
 
           // Publish the event to the Stream
           client.publish(code, msg);
-          setViewOnly(false);
+          if (startColor === 'white') {
+            setViewOnly(false);
+          }
           doOnce = false;
         }
       });
@@ -127,7 +132,7 @@ function ChessBoard(props) {
   const formatTime = (msecs) => {
     const tenth = parseInt((msecs / 100) % 10, 10);
     let secs = parseInt((msecs / 1000) % 60, 10);
-    let mins = parseInt((msecs / 60000) /* % 60 */, 10);
+    let mins = parseInt((msecs / 60000) /* % 60 */, 10); // % 60 if using hours
     // let hours = parseInt((msecs / 3600000), 10);
 
     // hours = hours < 10 ? `0${hours}` : hours;
@@ -138,22 +143,25 @@ function ChessBoard(props) {
     return `${mins}:${secs}.${tenth}`;
   };
 
+  // chess clock
   useEffect(() => {
+    const start = Date.now();
     const chessClock = setInterval(() => {
       // console.log(turnColor(), startColor, turnColor() === startColor);
+      console.log(`doOnce: ${doOnce}`);
       const homeTime = document.getElementById('homeTime');
       const opponentTime = document.getElementById('opponentTime');
       // console.log(`opponent time: ${opponent.time}, home time: ${home.time}`);
       if (homeTime != null && opponentTime != null && !doOnce) {
-        if (turnColor() === startColor) {
+        if (turnColor() === startColor) { // decrease own time if own turn
           home.time -= 100;
           homeTime.innerHTML = formatTime(home.time);
-        } else {
+        } else { // decrease opponent time if opponent turn
           opponent.time -= 100;
           opponentTime.innerHTML = formatTime(opponent.time);
         }
       }
-    }, 100);
+    }, 100 - (start - Date.now()));
     return () => clearInterval(chessClock);
   });
 
