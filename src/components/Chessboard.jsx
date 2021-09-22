@@ -20,7 +20,7 @@ import knight from '../images/wN.svg';
 // import Clock from './clock';
 // import * as clockActions from '../actions';
 
-let doOnce = true;
+let doOnce = true; // this is for knowing when both players have joined, i.e. this becomes false
 
 const home = {
   username: '-', address: '-', elo: '-', time: 600000, turn: true,
@@ -73,6 +73,20 @@ function ChessBoard(props) {
     log.innerHTML = `<p>${gameArr.join('</p><p>')}</p>`;
   }
 
+  const formatTime = (msecs) => {
+    const tenth = parseInt((msecs / 100) % 10, 10);
+    let secs = parseInt((msecs / 1000) % 60, 10);
+    let mins = parseInt((msecs / 60000) /* % 60 */, 10); // % 60 if using hours
+    // let hours = parseInt((msecs / 3600000), 10);
+
+    // hours = hours < 10 ? `0${hours}` : hours;
+    mins = mins < 10 ? `0${mins}` : mins;
+    secs = secs < 10 ? `0${secs}` : secs;
+
+    // return `${hours}:${mins}:${secs}.${tenth}`;
+    return `${mins}:${secs}.${tenth}`;
+  };
+
   // eslint-disable-next-line no-unused-vars
   const flipBoard = () => (orientation === 'white' ? 'black' : 'white');
   const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
@@ -89,6 +103,7 @@ function ChessBoard(props) {
         stream: code,
       },
       (message) => {
+        console.log(message);
         // This function will be called when new messages occur
         if (message.hello !== 'world') {
           if (color !== turnColor()) {
@@ -112,7 +127,7 @@ function ChessBoard(props) {
           } else {
             setViewOnly(true);
           }
-        } else if (doOnce) {
+        } else if (doOnce) { // both players have now joined
           const msg = {
             hello: 'world',
           };
@@ -120,40 +135,36 @@ function ChessBoard(props) {
           // Publish the event to the Stream
           client.publish(code, msg);
           if (startColor === 'white') {
-            setViewOnly(false);
+            setViewOnly(false); // white gets to play first move
           }
           doOnce = false;
         }
       });
+      // eslint-disable-next-line spaced-comment
+      /* useEffect(() => {
+        const syncClock = setInterval(( => {
+          const homeTime = document.getElementById('homeTime');
+          const opponentTime = document.getElementById('opponentTime');
+
+        }))
+      }
+      )*/
     }
     updateLog();
   }, [code, color]);
 
-  const formatTime = (msecs) => {
-    const tenth = parseInt((msecs / 100) % 10, 10);
-    let secs = parseInt((msecs / 1000) % 60, 10);
-    let mins = parseInt((msecs / 60000) /* % 60 */, 10); // % 60 if using hours
-    // let hours = parseInt((msecs / 3600000), 10);
-
-    // hours = hours < 10 ? `0${hours}` : hours;
-    mins = mins < 10 ? `0${mins}` : mins;
-    secs = secs < 10 ? `0${secs}` : secs;
-
-    // return `${hours}:${mins}:${secs}.${tenth}`;
-    return `${mins}:${secs}.${tenth}`;
-  };
-
   // chess clock
-  const clockInterval = 200;
+  const clockInterval = 200; // use this to change how fast the clock ticks
   useEffect(() => {
     const start = Date.now();
     const chessClock = setInterval(() => {
       // console.log(turnColor(), startColor, turnColor() === startColor);
-      console.log(`doOnce: ${doOnce}`);
+      // console.log(`doOnce: ${doOnce}`);
       const homeTime = document.getElementById('homeTime');
       const opponentTime = document.getElementById('opponentTime');
       // console.log(`opponent time: ${opponent.time}, home time: ${home.time}`);
       if (homeTime != null && opponentTime != null && !doOnce) {
+        // only change times if both players have joined, and homeTime and opponentTime aren't null
         if (turnColor() === startColor) { // decrease own time if own turn
           home.time -= clockInterval;
           homeTime.innerHTML = formatTime(home.time);
@@ -304,7 +315,7 @@ function ChessBoard(props) {
           </div>
           <div id="buttons">
             <Button style={{ width: '9vw', margin: '10px' }}>offer draw</Button>
-            <Button style={{ width: '3vw', margin: '10px' }} type="primary"/* onClick={setOrientation(flipBoard())} */>🔄</Button>
+            <Button style={{ width: '3vw', margin: '10px' }}/* onClick={setOrientation(flipBoard())} */>🔄</Button>
             <Button style={{ width: '9vw', margin: '10px' }}>resign</Button>
           </div>
           <div className="user">
