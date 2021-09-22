@@ -249,7 +249,7 @@ function ChessBoard(props) {
     };
   };
 
-  const boardsize = Math.round((Math.min(window.innerWidth, window.innerHeight) * 0.91) / 8) * 8;
+  // const boardsize = Math.round((Math.min(window.innerWidth, window.innerHeight) * 0.91) / 8) * 8;
 
   // eslint-disable-next-line no-return-assign
   return (
@@ -258,12 +258,12 @@ function ChessBoard(props) {
       height: '100vh',
     }}
     >
-      <div id="everything">
+      <div styles={{ display: 'flex' }} id="everything">
         {/* <div id="chatbox">
           <p>chat stuff goes here</p>
           <input id="textInput" />
         </div> */}
-        <div id="outerLog">
+        <div styles={{ display: 'flex' }} id="outerLog">
           <p style={{
             fontSize: '20px',
             margin: '15px',
@@ -272,22 +272,23 @@ function ChessBoard(props) {
           >
             Moves
           </p>
-          <div id="innerLog" />
-          <p style={{ margin: '10px' }} />
+          <div styles={{ display: 'flex' }} id="innerLog" />
+          <p style={{ margin: '10px', display: 'flex' }} />
         </div>
-        <div id="chessboard">
+        <div styles={{ display: 'flex' }} id="chessboard">
           <Row>
             <Col span={12}>
-              <div id="chessboard">
+              <div styles={{ display: 'flex' }} id="chessboard">
                 <Chessground
-                  width={boardsize}
-                  height={boardsize}
+                  width="91vh"
+                  height="91vh"
                   turnColor={turnColor()}
                   movable={calcMovable()}
                   lastMove={lastMove}
                   fen={fen}
                   onMove={onMove}
                   highlight={{
+                    flex: 1,
                     check: true,
                     lastMove: true,
                   }}
@@ -304,8 +305,8 @@ function ChessBoard(props) {
             </Col>
           </Row>
         </div>
-        <div id="dashboard">
-          <div className="user">
+        <div styles={{ display: 'flex' }} id="dashboard">
+          <div styles={{ display: 'flex' }} className="user">
             <div className="userinfo">
               <div className="username">{home.username}</div>
               <div className="userAddress">{home.address}</div>
@@ -313,7 +314,7 @@ function ChessBoard(props) {
             </div>
             <div id="homeTime" className="userTime">{formatTime(home.time)}</div>
           </div>
-          <div id="buttons">
+          <div styles={{ display: 'flex' }} id="buttons">
             <Button style={{ width: '9vw', margin: '10px' }}>offer draw</Button>
             <Button style={{ width: '3vw', margin: '10px' }}/* onClick={setOrientation(flipBoard())} */>🔄</Button>
             <Button style={{ width: '9vw', margin: '10px' }}>resign</Button>

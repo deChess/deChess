@@ -50,6 +50,7 @@ body {
     border-radius: 10px;
     height: 70vh;
     overflow: hidden;
+    display: flex;
 }
 
 #innerLog {
@@ -59,6 +60,7 @@ body {
     height: 70vh;
     overflow-y: auto;
     text-align: center;
+    display: flex;
 }
 
 #chatbox {
