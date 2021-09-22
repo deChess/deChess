@@ -23,3 +23,9 @@ jobs:
         pinataKey: ${{ secrets.PINATA_KEY }}
         pinataSecret: ${{ secrets.PINATA_SECRET }}
         pinataPinName: deChess
+    - name: Deploy to Skynet
+      uses: SkynetLabs/deploy-to-skynet-action@v2.0.1
+      with:
+        upload-dir: ./build
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        
