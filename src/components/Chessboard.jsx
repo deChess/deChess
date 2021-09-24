@@ -249,9 +249,25 @@ function ChessBoard(props) {
     };
   };
 
-  // const boardsize = Math.round((Math.min(window.innerWidth, window.innerHeight) * 0.91) / 8) * 8;
+  // change page layout depending on window aspect ratio (| for side-by-side and + for stacked)
+  // moves | chessboard | dashboard if > 16:9
+  // chessboard | moves + dashboard if < 16:9 and > 1:1
+  // moves + chessboard + dashboard if < 1:1
+  useEffect(() => {
+    function handleResize() {
+      // console.log('resized to: ', window.innerWidth, ' by ', window.innerHeight);
+      const everything = document.getElementById('everything');
+      if (window.innerWidth / 16 >= window.innerHeight / 9) { // > 16:9
+        everything.style.flexDirection = 'row';
+      } else if (window.innerWidth < window.innerHeight) { // < 1:1
+        everything.style.flexDirection = 'column';
+      } else { // < 16:9 and > 1:1
+        everything.style.flexDirection = 'column';
+      }
+    }
+    window.addEventListener('resize', handleResize);
+  }, []);
 
-  // eslint-disable-next-line no-return-assign
   return (
     <div style={{
       background: '#2b313c',
@@ -280,8 +296,8 @@ function ChessBoard(props) {
             <Col span={12}>
               <div styles={{ display: 'flex' }} id="chessboard">
                 <Chessground
-                  width="91vh"
-                  height="91vh"
+                  width="88vh"
+                  height="88vh"
                   turnColor={turnColor()}
                   movable={calcMovable()}
                   lastMove={lastMove}
@@ -298,7 +314,7 @@ function ChessBoard(props) {
                     castle: true,
                   }}
                   check={isChecked}
-                  style={{ margin: '5%' }}
+                  style={{ margin: '30px' }}
                   orientation={orientation}
                 />
               </div>
@@ -316,7 +332,7 @@ function ChessBoard(props) {
           </div>
           <div styles={{ display: 'flex' }} id="buttons">
             <Button style={{ width: '9vw', margin: '10px' }}>offer draw</Button>
-            <Button style={{ width: '3vw', margin: '10px' }}/* onClick={setOrientation(flipBoard())} */>🔄</Button>
+            <Button style={{ width: '3vw', margin: '10px' }} onClick={() => setOrientation(flipBoard())}>🔄</Button>
             <Button style={{ width: '9vw', margin: '10px' }}>resign</Button>
           </div>
           <div className="user">
