@@ -315,7 +315,7 @@ function ChessBoard(props) {
           </div>
           <div id="buttons">
             <Button style={{ width: '9vw', margin: '10px' }}>offer draw</Button>
-            <Button style={{ width: '3vw', margin: '10px' }}/* onClick={setOrientation(flipBoard())} */>🔄</Button>
+            <Button style={{ width: '3vw', margin: '10px' }} onClick={() => setOrientation(flipBoard())}>🔄</Button>
             <Button style={{ width: '9vw', margin: '10px' }}>resign</Button>
           </div>
           <div className="user">
