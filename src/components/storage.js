@@ -1,4 +1,4 @@
-import { Web3Storage } from 'web3.storage';
+import { Web3Storage } from 'web3.storage/dist/bundle.esm.min';
 
 function getAccessToken() {
   return process.env.WEB3STORAGE_API_KEY;

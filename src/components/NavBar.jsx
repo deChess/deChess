@@ -54,6 +54,7 @@ function NavBar(props) {
               setClient(client);
               const ensAddress = await provider.lookupAddress(ethereum.selectedAddress);
               setAddress(ensAddress || currentAccount);
+            // eslint-disable-next-line no-console
             } catch (error) { console.log('error connecting to metamask '); }
           }
         }}
