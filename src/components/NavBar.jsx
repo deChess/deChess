@@ -1,5 +1,6 @@
 /* eslint-disable linebreak-style */
 /* eslint-disable no-empty */
+
 import React from 'react';
 import { Menu } from 'antd';
 import {
@@ -14,6 +15,22 @@ function NavBar(props) {
     setClient, address, setAddress, setProvider,
   } = props;
   const { ethereum } = window;
+  let currentAccount = null;
+
+  // For now, 'eth_accounts' will continue to always return an array
+  function handleAccountsChanged(accounts) {
+    if (accounts.length === 0) {
+      // MetaMask is locked or the user has not connected any accounts
+    } else if (accounts[0] !== currentAccount) {
+      [currentAccount] = accounts;
+      setAddress(currentAccount);
+    }
+  }
+
+  // Note that this event is emitted on page load.
+  // If the array of accounts is non-empty, you're already
+  // connected.
+  ethereum.on('accountsChanged', handleAccountsChanged);
 
   return (
     <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['play']}>
@@ -22,31 +39,23 @@ function NavBar(props) {
       <Menu.Item key="collection"><Link to="/collection">Collection</Link></Menu.Item>
       <Menu.Item
         onClick={async () => {
-          if (!ethereum) {
-            setAddress('no wallet detected');
-            return;
+          if (window.ethereum) {
+            try {
+              await window.ethereum.request({ method: 'eth_requestAccounts' }).then(handleAccountsChanged);
+              setAddress(currentAccount);
+              const provider = new ethers.providers.Web3Provider(ethereum);
+              provider.getSigner();
+              setProvider(provider);
+              const client = await new StreamrClient({
+                // restUrl: 'http://localhost/api/v1', // if you want to test locally in the streamr-docker-dev environment
+                auth: { ethereum },
+                publishWithSignature: 'never',
+              });
+              setClient(client);
+              const ensAddress = await provider.lookupAddress(ethereum.selectedAddress);
+              setAddress(ensAddress || currentAccount);
+            } catch (error) { console.log('error connecting to metamask '); }
           }
-          await window.ethereum.enable();
-          const provider = new ethers.providers.Web3Provider(ethereum);
-          provider.getSigner();
-          await provider.send('eth_requestAccounts', []);
-          if (!ethereum.selectedAddress) {
-            setAddress('wallet not signed in');
-            return;
-          }
-          const client = await new StreamrClient({
-            // restUrl: 'http://localhost/api/v1', // if you want to test locally in the streamr-docker-dev environment
-            auth: { ethereum },
-            publishWithSignature: 'never',
-          });
-          setClient(client);
-          let ensAddress;
-          try {
-            ensAddress = await provider.lookupAddress(ethereum.selectedAddress);
-          } catch (err) {
-          }
-          setAddress(ensAddress || ethereum.selectedAddress);
-          setProvider(provider);
         }}
         style={{ position: 'absolute', top: 0, right: 0 }}
         key="Connect"
@@ -56,5 +65,4 @@ function NavBar(props) {
     </Menu>
   );
 }
-
 export default NavBar;
