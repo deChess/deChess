@@ -84,6 +84,10 @@ body {
     justify-content: center;
 }
 
+#userAddress {
+    max-width: 50px;
+}
+
 #chessboard > div > cg-helper > cg-container > svg.cg-custom-svgs {
     height: 0px;
 }

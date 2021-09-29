@@ -7,6 +7,8 @@ import { useHistory } from 'react-router-dom';
 import { ethers } from 'ethers';
 
 const { Title } = Typography;
+const clockTime = 600000;
+let opponentAddress = '';
 
 function CreateModal(props) {
   const {
@@ -31,6 +33,7 @@ function CreateModal(props) {
             if (!ensDecoded) {
               ensDecoded = friendAddress;
             }
+            opponentAddress = ensDecoded.toLowerCase();
             try {
               const currTime = Date.now();
               const stream = await client.createStream({
@@ -63,6 +66,8 @@ function CreateModal(props) {
             setSettings({
               vsComputer: false,
               startColor: 'white',
+              white: { address, time: clockTime, rating: 0 },
+              black: { address: opponentAddress, time: clockTime, rating: 0 },
             });
             if (code !== '') {
               history.push('/game');

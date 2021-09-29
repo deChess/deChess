@@ -22,17 +22,14 @@ import knight from '../images/wN.svg';
 
 let doOnce = true; // this is for knowing when both players have joined, i.e. this becomes false
 
-const home = {
-  username: '-', address: '-', elo: '-', time: 600000, turn: true,
-}; // centiseconds i.e. 0.01
-const opponent = {
-  username: '-', address: '-', elo: '-', time: 600000, turn: false,
-};
-
 // source for PGN stuff: http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 const gameData = { // this will be converted to the JSON file that is uploaded to web3.storage
-  black: { address: '', time: 0, rating: 0 },
-  white: { address: '', time: 0, rating: 0 },
+  black: {
+    username: '', address: '', time: 0, rating: 0,
+  },
+  white: {
+    username: '', address: '', time: 0, rating: 0,
+  },
   startTime: 0,
   moveTimes: [],
   result: '*',
@@ -46,6 +43,9 @@ function ChessBoard(props) {
       vsComputer, startColor, black, white,
     }, client, code,
   } = props;
+
+  const home = startColor === 'black' ? black : white;
+  const opponent = startColor === 'white' ? black : white;
 
   gameData.black = black;
   gameData.white = white;
@@ -62,7 +62,6 @@ function ChessBoard(props) {
   const [orientation, setOrientation] = useState(startColor);
 
   function updateLog() {
-    gameData.moveTimes.add(Date.now());
     const game = chess.pgn();
     gameData.pgn = game;
     const gameArr = [];
@@ -171,7 +170,7 @@ function ChessBoard(props) {
   }, [code, color]);
 
   // chess clock
-  const clockInterval = 200; // use this to change how fast the clock ticks
+  const clockInterval = 100; // use this to change how fast the clock ticks
   useEffect(() => {
     const start = Date.now();
     const chessClock = setInterval(() => {
@@ -324,8 +323,7 @@ function ChessBoard(props) {
         <div id="dashboard">
           <div className="user">
             <div className="userinfo">
-              <div className="username">{home.username}</div>
-              <div className="userAddress">{home.address}</div>
+              <div className="userAddress" style={{ width: '180px', wordWrap: 'break-word' }}>{home.address}</div>
               <div className="elo">{home.elo}</div>
             </div>
             <div id="homeTime" className="userTime">{formatTime(home.time)}</div>
@@ -337,8 +335,7 @@ function ChessBoard(props) {
           </div>
           <div className="user">
             <div className="userinfo">
-              <div className="username">{opponent.username}</div>
-              <div className="userAddress">{opponent.address}</div>
+              <div className="userAddress" style={{ width: '180px', wordWrap: 'break-word' }}>{opponent.address}</div>
               <div className="elo">{opponent.elo}</div>
             </div>
             <div id="opponentTime" className="userTime">{formatTime(opponent.time)}</div>

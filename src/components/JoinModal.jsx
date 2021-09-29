@@ -6,10 +6,11 @@ import {
 import { useHistory } from 'react-router-dom';
 
 const { Title } = Typography;
+const clockTime = 600000;
 
 function CreateModal(props) {
   const {
-    joinVisible, setJoinVisible, client, code, setCode, setSettings,
+    joinVisible, setJoinVisible, client, code, setCode, setSettings, address,
   } = props;
   // const [anon, setAnon] = useState(false);
   const [wrongCode, setWrongCode] = useState(false);
@@ -31,9 +32,12 @@ function CreateModal(props) {
           // Publish the event to the Stream
           try {
             await client.publish(code, msg);
+            const opponentAddress = code.split('/')[0];
             setSettings({
               vsComputer: false,
               startColor: 'black', // black if joining a game
+              white: { address: opponentAddress, time: clockTime, rating: 0 },
+              black: { address, time: clockTime, rating: 0 },
             });
             if (code !== '') {
               history.push('/game');

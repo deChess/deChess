@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 import CreateModal from './CreateModal';
 import JoinModal from './JoinModal';
 
+const clockTime = 600000;
+
 export default function MainMenu(props) {
   const {
     setSettings, client, code, setCode, address,
@@ -38,6 +40,9 @@ export default function MainMenu(props) {
         onClick={() => {
           setSettings({
             vsComputer: true,
+            startColor: 'white',
+            black: { address: 'computer', time: clockTime },
+            white: { address, time: clockTime },
           });
         }}
       >
