@@ -13,12 +13,12 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux'; */
 // import { start } from 'ipfs-core/src/components/network';
+// eslint-disable-next-line no-unused-vars
+import { makeFileObjects, storeFiles } from './storage';
 import queen from '../images/wQ.svg';
 import rook from '../images/wR.svg';
 import bishop from '../images/wB.svg';
 import knight from '../images/wN.svg';
-// import Clock from './clock';
-// import * as clockActions from '../actions';
 
 let doOnce = true; // this is for knowing when both players have joined, i.e. this becomes false
 
@@ -29,12 +29,27 @@ const opponent = {
   username: '-', address: '-', elo: '-', time: 600000, turn: false,
 };
 
+// source for PGN stuff: http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
+const gameData = { // this will be converted to the JSON file that is uploaded to web3.storage
+  black: { address: '', time: 0, rating: 0 },
+  white: { address: '', time: 0, rating: 0 },
+  startTime: 0,
+  moveTimes: [],
+  result: '*',
+  pgn: '',
+};
+
 function ChessBoard(props) {
   // eslint-disable-next-line no-unused-vars
-  const { settings: { vsComputer, startColor }, client, code } = props;
-  // eslint-disable-next-line no-console
-  // console.log(vsComputer);
-  // console.log(startColor);
+  const {
+    settings: {
+      vsComputer, startColor, black, white,
+    }, client, code,
+  } = props;
+
+  gameData.black = black;
+  gameData.white = white;
+
   const [chess] = useState(new Chess());
   const [pendingMove, setPendingMove] = useState();
   const [selectVisible, setSelectVisible] = useState(false);
@@ -47,7 +62,9 @@ function ChessBoard(props) {
   const [orientation, setOrientation] = useState(startColor);
 
   function updateLog() {
+    gameData.moveTimes.add(Date.now());
     const game = chess.pgn();
+    gameData.pgn = game;
     const gameArr = [];
     const moveStarts = [];
     for (let i = 0; i < game.length; i += 1) {

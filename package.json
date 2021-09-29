@@ -30,7 +30,8 @@
     "streamr-client": "^5.4.4",
     "styled-components": "^5.3.1",
     "walletconnect": "^1.6.5",
-    "web-vitals": "^1.0.1"
+    "web-vitals": "^1.0.1",
+    "web3.storage": "^3.3.2"
   },
   "scripts": {
     "start": "react-scripts start",
