@@ -11,8 +11,10 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         node-version: '14'
+        cache: 'npm'
+        cache-dependency-path: 'subdir/package-lock.json'
     - run: npm install
-    - run: npm test
+    - run: npm start
       env: 
         WEB3STORAGE_KEY: ${{ secrets.WEB3STORAGE_KEY }}
     - name: Upload to IPFS
