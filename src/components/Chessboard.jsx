@@ -179,7 +179,7 @@ function ChessBoard(props) {
         'White', gameData.white,
         'Black', gameData.black,
         'UTCDate', UTCDateToday,
-        'UTCTime', `${currDate.getHours()}:${currDate.getMinutes()}:${currDate.getSeconds()}`,
+        'UTCTime', `${currDate.getUTCHours()}:${currDate.getUTCMinutes()}:${currDate.getUTCSeconds.length === 1 ? '0' : ''}${currDate.getUTCSeconds()}`,
         'WhiteElo', gameData.white.rating,
         'BlackElo', gameData.black.rating,
         'Annotator', 'dechess.eth',
