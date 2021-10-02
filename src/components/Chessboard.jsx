@@ -13,28 +13,81 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux'; */
 // import { start } from 'ipfs-core/src/components/network';
+// eslint-disable-next-line no-unused-vars
+import { makeFileObjects, storeFiles, getAccessToken } from './storage';
 import queen from '../images/wQ.svg';
 import rook from '../images/wR.svg';
 import bishop from '../images/wB.svg';
 import knight from '../images/wN.svg';
-// import Clock from './clock';
-// import * as clockActions from '../actions';
 
 let doOnce = true; // this is for knowing when both players have joined, i.e. this becomes false
+let clockStarted = false; // let clock start at correct time
+const joined = []; // array of player addresses who have joined
+let gameDataInitialized = false;
 
-const home = {
-  username: '-', address: '-', elo: '-', time: 600000, turn: true,
-}; // centiseconds i.e. 0.01
-const opponent = {
-  username: '-', address: '-', elo: '-', time: 600000, turn: false,
+let uploaded = false;
+
+let gameOver = false;
+
+const drawOffer = {
+  drawOffered: false,
+  drawAccepted: false,
+};
+
+const movesList = [];
+
+// source for PGN stuff: http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
+const gameData = { // this will be converted to the JSON file that is uploaded to web3.storage
+  streamID: '',
+  uploader: '',
+  black: {
+    address: '', totalTime: 0, remainingTime: 0, rating: '-', increment: 0,
+  },
+  white: {
+    address: '', totalTime: 0, remainingTime: 0, rating: '-', increment: 0,
+  },
+  startTime: -1,
+  moveTimes: [],
+  result: '*',
+  pgn: '', // put tags or not?
+  chat: [],
 };
 
 function ChessBoard(props) {
   // eslint-disable-next-line no-unused-vars
-  const { settings: { vsComputer, startColor }, client, code } = props;
-  // eslint-disable-next-line no-console
-  // console.log(vsComputer);
-  // console.log(startColor);
+  const {
+    settings: {
+      vsComputer, startColor, black, white, streamId,
+    }, client, code,
+  } = props;
+
+  const opponentColor = startColor === 'white' ? 'black' : 'white';
+  const colSymbols = { white: '⚪ - ', black: '⚫ - ' }; // uses non-breaking spaces
+
+  if (!gameDataInitialized) {
+    gameData.black.address = black.address;
+    gameData.black.totalTime = black.time;
+    gameData.black.remainingTime = black.time;
+    gameData.black.rating = black.rating;
+    gameData.black.increment = black.increment;
+
+    gameData.white.address = white.address;
+    gameData.white.totalTime = white.time;
+    gameData.white.remainingTime = white.time;
+    gameData.white.rating = white.rating;
+    gameData.white.increment = white.increment;
+
+    gameData.uploader = gameData[startColor].address;
+
+    gameData.streamID = streamId;
+    gameDataInitialized = true;
+  }
+
+  const home = gameData[startColor];
+  const opponent = gameData[opponentColor];
+
+  // localStorage.setItem('streamID', gameData.streamID); // used to test, might be used in future
+
   const [chess] = useState(new Chess());
   const [pendingMove, setPendingMove] = useState();
   const [selectVisible, setSelectVisible] = useState(false);
@@ -43,34 +96,106 @@ function ChessBoard(props) {
   const [isChecked, setChecked] = useState(false);
   const [viewOnly, setViewOnly] = useState(true);
   const [color, setColor] = useState(startColor);
-  // eslint-disable-next-line no-unused-vars
   const [orientation, setOrientation] = useState(startColor);
 
-  function updateLog() {
+  const currDate = new Date();
+  const dateToday = `${currDate.getFullYear()}.${currDate.getMonth() + 1 < 10 ? '0' : ''}${currDate.getMonth() + 1}.${currDate.getDate() < 10 ? '0' : ''}${currDate.getDate()}`;
+  const UTCDateToday = `${currDate.getFullYear()}.${currDate.getMonth() + 1 < 10 ? '0' : ''}${currDate.getMonth() + 1}.${currDate.getDate() < 10 ? '0' : ''}${currDate.getDate()}`;
+
+  function updateLog() { // called at every move (and then some)
     const game = chess.pgn();
-    const gameArr = [];
-    const moveStarts = [];
-    for (let i = 0; i < game.length; i += 1) {
-      if (game[i] === '.') {
-        if (i < 10) {
-          moveStarts.push(i - 1);
-        } else if (i < 100) {
-          moveStarts.push(i - 2);
-        } else {
-          moveStarts.push(i - 3);
-        }
-      }
+    gameData.pgn = game;
+    const moves = chess.history();
+
+    const movePairs = [];
+    for (let i = 0; i < moves.length; i += 2) {
+      movePairs.push([moves[i], moves[i + 1] !== undefined ? moves[i + 1] : '']);
     }
-    for (let i = 0; i < moveStarts.length; i += 1) {
-      if (i + 1 !== moveStarts.length) {
-        gameArr.push(game.slice(moveStarts[i], moveStarts[i + 1]));
-      } else {
-        gameArr.push(game.slice(moveStarts[i]));
-      }
+
+    const displayedMoves = [];
+    for (let i = 0; i < movePairs.length; i += 1) {
+      displayedMoves.push(`${i + 1}. ${movePairs[i][0]} ${movePairs[i][1]}`);
     }
+
     const log = document.getElementById('innerLog');
     log.scrollTop = log.scrollHeight;
-    log.innerHTML = `<p>${gameArr.join('</p><p>')}</p>`;
+    log.innerHTML = `<p>${displayedMoves.join('<br></br>')}</p>`;
+
+    const moveHistory = chess.history();
+    if (movesList[movesList.length - 1] !== moveHistory[moveHistory.length - 1]) {
+      movesList.push(moveHistory[moveHistory.length - 1]);
+      gameData.moveTimes.push({ move: moveHistory[moveHistory.length - 1], time: Date.now() });
+      console.log(movesList);
+    }
+
+    if (vsComputer && !clockStarted) { clockStarted = true; gameData.startTime = Date.now(); }
+
+    if (chess.in_threefold_repetition()) {
+      drawOffer.drawOffered = true; // draw offer extended to both players if in 3-fold rep
+    }
+
+    if (chess.game_over()
+    || gameData[startColor].remainingTime <= 0 || gameData[opponentColor].remainingTime <= 0
+    || (drawOffer.drawOffered && drawOffer.drawAccepted)) {
+      gameOver = true;
+      let whiteWon = false;
+      let gameDrawn = false;
+
+      if (gameData[startColor].remainingTime <= 0) { // opponent wins on time
+        whiteWon = startColor === 'black';
+      } else if (gameData[opponentColor].remainingTime <= 0) { // home wins on time
+        whiteWon = startColor === 'white';
+      } else if (chess.game_over() && !chess.in_checkmate()) { // draw/stalemate
+        whiteWon = false;
+      }
+
+      let finalComment = '';
+
+      if (gameData[startColor].remainingTime <= 0 || gameData[opponentColor].remainingTime <= 0) {
+        chess.set_comment(` ${whiteWon ? 'White' : 'Black'} wins on time. `);
+        chess.header('Termination', 'Time forfeit');
+      } else if (chess.in_stalemate()) {
+        finalComment = ' Draw by stalemate. ';
+      } else if (chess.in_draw() && !chess.insufficient_material()) {
+        gameDrawn = true;
+        finalComment = ' Draw by 50 move rule. ';
+      } else if (chess.in_draw() && chess.insufficient_material()) {
+        gameDrawn = true;
+        finalComment = ' Draw by insufficent material. ';
+      } else if (chess.in_checkmate()) {
+        // check who moved last
+        whiteWon = chess.history.length % 2 === 1; // odd means white moved last
+        finalComment = ` ${whiteWon ? 'White' : 'Black'} wins by checkmate. `;
+      } else if (chess.in_threefold_repetition()) {
+        gameDrawn = true;
+        finalComment = ' Draw by threefold repetition. ';
+      }
+      chess.set_comment(finalComment);
+      const gameResult = gameDrawn ? '1/2-1/2' : (whiteWon ? '1-0' : '0-1');
+      chess.header(
+        'Event', 'deChess Casual Game',
+        'Site', 'https://dechess.eth.link',
+        'Date', dateToday,
+        'White', gameData.white,
+        'Black', gameData.black,
+        'UTCDate', UTCDateToday,
+        'UTCTime', `${currDate.getUTCHours()}:${currDate.getUTCMinutes()}:${currDate.getUTCSeconds.length === 1 ? '0' : ''}${currDate.getUTCSeconds()}`,
+        'WhiteElo', gameData.white.rating,
+        'BlackElo', gameData.black.rating,
+        'Annotator', 'dechess.eth',
+        'Result', gameResult,
+      );
+      gameData.result = gameResult;
+      gameData.pgn = chess.pgn();
+      if (!uploaded) {
+        const uploadedFiles = makeFileObjects(gameData);
+        const uploadedFilesCID = storeFiles(uploadedFiles);
+        uploaded = true;
+        return uploadedFilesCID;
+      }
+    }
+
+    return '';
   }
 
   const formatTime = (msecs) => {
@@ -92,7 +217,7 @@ function ChessBoard(props) {
   const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
 
   useEffect(() => {
-    if (doOnce && startColor === 'black') {
+    if (doOnce) {
       setViewOnly(true);
     }
 
@@ -103,9 +228,10 @@ function ChessBoard(props) {
         stream: code,
       },
       (message) => {
-        console.log(message);
+        // console.log(message);
         // This function will be called when new messages occur
-        if (message.hello !== 'world') {
+        if (message.type === 'move') {
+          if (!clockStarted) { gameData.startTime = Date.now(); clockStarted = true; console.log('game started!'); } // start clock if not started
           if (color !== turnColor()) {
             const { move } = message;
             const { from, to } = move;
@@ -121,22 +247,41 @@ function ChessBoard(props) {
               setFen(chess.fen());
               setLastMove([from, to]);
               setChecked(chess.in_check());
-              updateLog();
             }
             setViewOnly(false);
+            updateLog();
           } else {
             setViewOnly(true);
           }
-        } else if (doOnce) { // both players have now joined
+        } else if (message.type === 'join' || message.type === 'ready' || message.type === 'start') {
+          if (!joined.includes(message.from)) {
+            joined.push(message.from);
+          }
+        } else if (message.type === 'command') { // maybe add one for chat too?
+          if (message.command === 'offer_draw') {
+            drawOffer.drawOffered = true;
+          }
+        }
+        if (message.type === 'ready') {
           const msg = {
-            hello: 'world',
+            type: 'start',
+            from: home.address,
+            time: Date.now(),
           };
-
+          client.publish(code, msg);
+        }
+        if (doOnce) { // both players have now joined
+          const msg = {
+            type: 'ready',
+            from: home.address,
+            color: startColor,
+            time: Date.now(),
+          };
+          if (startColor === 'white') {
+            setViewOnly(false); // white plays first move
+          }
           // Publish the event to the Stream
           client.publish(code, msg);
-          if (startColor === 'white') {
-            setViewOnly(false); // white gets to play first move
-          }
           doOnce = false;
         }
       });
@@ -150,31 +295,59 @@ function ChessBoard(props) {
       }
       )*/
     }
-    updateLog();
   }, [code, color]);
 
   // chess clock
-  const clockInterval = 200; // use this to change how fast the clock ticks
+  const clockInterval = 100; // use this to change how fast the clock ticks
   useEffect(() => {
     const start = Date.now();
     const chessClock = setInterval(() => {
-      // console.log(turnColor(), startColor, turnColor() === startColor);
-      // console.log(`doOnce: ${doOnce}`);
       const homeTime = document.getElementById('homeTime');
       const opponentTime = document.getElementById('opponentTime');
-      // console.log(`opponent time: ${opponent.time}, home time: ${home.time}`);
-      if (homeTime != null && opponentTime != null && !doOnce) {
+      // eslint-disable-next-line max-len
+      if (homeTime != null && opponentTime != null && !gameOver && clockStarted) {
         // only change times if both players have joined, and homeTime and opponentTime aren't null
         if (turnColor() === startColor) { // decrease own time if own turn
-          home.time -= clockInterval;
-          homeTime.innerHTML = formatTime(home.time);
+          gameData[startColor].remainingTime -= clockInterval;
+          homeTime.innerHTML = formatTime(gameData[startColor].remainingTime);
         } else { // decrease opponent time if opponent turn
-          opponent.time -= clockInterval;
-          opponentTime.innerHTML = formatTime(opponent.time);
+          gameData[opponentColor].remainingTime -= clockInterval;
+          opponentTime.innerHTML = formatTime(gameData[opponentColor].remainingTime);
         }
+      }
+      if (gameData[startColor].remainingTime <= 0 || gameData[opponentColor].remainingTime <= 0) {
+        setViewOnly(true);
+        updateLog();
       }
     }, clockInterval - (start - Date.now()));
     return () => clearInterval(chessClock);
+  });
+
+  // sync time
+  useEffect(() => {
+    const syncClock = setInterval(() => {
+      console.log('sync');
+    }, 5000);
+    return () => clearInterval(syncClock);
+  });
+
+  // ping opponent
+  useEffect(() => {
+    const poke = setInterval(() => {
+      if (startColor === 'white' && chess.turn() === 'w' && viewOnly) {
+        const msg = {
+          type: 'ready',
+          from: home.address,
+          message: 'pls respond :(',
+          time: Date.now(),
+        };
+        client.publish(code, msg);
+      }
+      if (joined.includes(gameData.black.address) && joined.includes(gameData.white.address)) {
+        clearInterval(poke); // stop poking if they respond
+      }
+    }, 1000);
+    return () => clearInterval(poke);
   });
 
   const randomMove = () => {
@@ -204,11 +377,14 @@ function ChessBoard(props) {
       setLastMove([from, to]);
       setChecked(chess.in_check());
       setColor(turnColor());
-      if (vsComputer) { setTimeout(randomMove, 500); } else {
+      if (vsComputer) {
+        setTimeout(randomMove, 500);
+      } else {
         client.publish(code, {
+          type: 'move',
           move:
           { from, to, promotion: 'q' },
-          fen: chess.fen(),
+          // fen: chess.fen(),
         });
       }
     }
@@ -225,11 +401,14 @@ function ChessBoard(props) {
     setSelectVisible(false);
     setChecked(chess.in_check());
     setColor(turnColor());
-    if (vsComputer) { setTimeout(randomMove, 500); } else {
+    if (vsComputer) {
+      setTimeout(randomMove, 500);
+    } else {
       client.publish(code, {
+        type: 'move',
         move:
-        { from, to, promotion: 'q' },
-        fen: chess.fen(),
+        { from, to, promotion: e },
+        // fen: chess.fen(),
       });
     }
     updateLog();
@@ -307,11 +486,10 @@ function ChessBoard(props) {
         <div id="dashboard">
           <div className="user">
             <div className="userinfo">
-              <div className="username">{home.username}</div>
-              <div className="userAddress">{home.address}</div>
-              <div className="elo">{home.elo}</div>
+              <div className="userAddress" style={{ textAlign: 'center' }}>{`${colSymbols[startColor]}‎‎‎${home.address}`}</div>
+              <div className="rating">{gameData[startColor].rating !== '-' ? '' : `rating: ${gameData[startColor].rating}`}</div>
+              <div id="homeTime" className="userTime" style={{ textAlign: 'center' }}>{formatTime(gameData[startColor].remainingTime)}</div>
             </div>
-            <div id="homeTime" className="userTime">{formatTime(home.time)}</div>
           </div>
           <div id="buttons">
             <Button style={{ width: '9vw', margin: '10px' }}>offer draw</Button>
@@ -320,11 +498,10 @@ function ChessBoard(props) {
           </div>
           <div className="user">
             <div className="userinfo">
-              <div className="username">{opponent.username}</div>
-              <div className="userAddress">{opponent.address}</div>
-              <div className="elo">{opponent.elo}</div>
+              <div className="userAddress" style={{ textAlign: 'center' }}>{`${colSymbols[opponentColor]}‎‎‎${opponent.address}`}</div>
+              <div className="rating">{gameData[opponentColor].rating !== '-' ? '' : `rating: ${gameData[opponentColor].rating}`}</div>
+              <div id="opponentTime" className="userTime" style={{ textAlign: 'center' }}>{formatTime(gameData[opponentColor].remainingTime)}</div>
             </div>
-            <div id="opponentTime" className="userTime">{formatTime(opponent.time)}</div>
           </div>
         </div>
 

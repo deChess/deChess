@@ -7,6 +7,10 @@ import { useHistory } from 'react-router-dom';
 import { ethers } from 'ethers';
 
 const { Title } = Typography;
+const clockTime = 600000;
+let currTime = Date.now();
+let opponentAddress = '';
+let displayedCode = '';
 
 function CreateModal(props) {
   const {
@@ -31,21 +35,25 @@ function CreateModal(props) {
             if (!ensDecoded) {
               ensDecoded = friendAddress;
             }
+            opponentAddress = ensDecoded.toLowerCase();
             try {
-              const currTime = Date.now();
+              currTime = Date.now();
+              displayedCode = `${address}-${currTime}`;
               const stream = await client.createStream({
                 // id: `${address}/game`,
                 // game ID is starting time of game
-                id: `${address}/${currTime}`, // or address/foo/bar or mydomain.eth/foo/bar
+                id: `${address}/dechess/game/${currTime}`, // or address/foo/bar or mydomain.eth/foo/bar
               });
-              if (!(await stream.hasPermission('stream_get', ensDecoded))) {
-                await stream.grantPermission('stream_get', ensDecoded);
+              // await stream.addToStorageNode(StorageNode.STREAMR_GERMANY); // store data
+              // everyone can get and subscribe to the stream (for spectating)
+              if (!(await stream.hasPermission('stream_get', null))) {
+                await stream.grantPermission('stream_get', null);
               }
               if (!(await stream.hasPermission('stream_publish', ensDecoded))) {
                 await stream.grantPermission('stream_publish', ensDecoded);
               }
-              if (!(await stream.hasPermission('stream_subscribe', ensDecoded))) {
-                await stream.grantPermission('stream_subscribe', ensDecoded);
+              if (!(await stream.hasPermission('stream_subscribe', null))) {
+                await stream.grantPermission('stream_subscribe', null);
               }
               setCode(stream);
             } catch (err) {
@@ -55,7 +63,10 @@ function CreateModal(props) {
             setProcessing(false);
           } else {
             const msg = {
-              hello: 'world',
+              type: 'join',
+              from: address,
+              color: 'white',
+              time: Date.now(),
             };
 
             // Publish the event to the Stream
@@ -63,6 +74,9 @@ function CreateModal(props) {
             setSettings({
               vsComputer: false,
               startColor: 'white',
+              white: { address, time: clockTime, rating: '-' },
+              black: { address: opponentAddress, time: clockTime, rating: '-' },
+              streamId: `${address}/dechess/game/${currTime}`,
             });
             if (code !== '') {
               history.push('/game');
@@ -92,7 +106,7 @@ function CreateModal(props) {
         />
       ) : (<Alert type="error" message="Please login on the top right first" />)}
       <div style={{ marginTop: 10 }}>
-        {code !== '' && (code.id ? <Alert type="success" message={`Give this code to your friend: "${code.id}" then press OK again to start`} /> // eslint-disable-line
+        {code !== '' && (code.id ? <Alert type="success" message={`Give this code to your friend: "${displayedCode}" then press OK again to start`} /> // eslint-disable-line
           : (processing ? <Alert message="Processing..." /> : <Alert type="error" message="Invalid address" />))}
         {' '}
         {' '}
