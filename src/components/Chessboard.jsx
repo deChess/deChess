@@ -96,12 +96,12 @@ function ChessBoard(props) {
 
   const currDate = new Date();
   const dateToday = `${currDate.getFullYear()}.
-                     ${currDate.getMonth() + 1 < 10 ? '0' : ''}${currDate.getMonth() + 1}.
-                     ${currDate.getDate() < 10 ? '0' : ''}${currDate.getDate()}`;
+  ${currDate.getMonth() + 1 < 10 ? '0' : ''}${currDate.getMonth() + 1}.
+  ${currDate.getDate() < 10 ? '0' : ''}${currDate.getDate()}`;
 
   const UTCDateToday = `${currDate.getFullYear()}.
-                     ${currDate.getMonth() + 1 < 10 ? '0' : ''}${currDate.getMonth() + 1}.
-                     ${currDate.getDate() < 10 ? '0' : ''}${currDate.getDate()}`;
+                    ${currDate.getMonth() + 1 < 10 ? '0' : ''}${currDate.getMonth() + 1}.
+                    ${currDate.getDate() < 10 ? '0' : ''}${currDate.getDate()}`;
 
   function updateLog() { // called at every move
     gameData.moveTimes.push(Date.now());
