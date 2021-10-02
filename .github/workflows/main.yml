@@ -7,15 +7,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    #- uses: actions/checkout@v2
-    #- uses: borales/actions-yarn@v2.3.0
-    #  with:
-    #    cmd: install # will run `yarn install` command
-    #- uses: borales/actions-yarn@v2.3.0
-    #  with:
-    #    cmd: build
-    #    env: 
-    #      WEB3STORAGE_KEY: ${{ secrets.WEB3STORAGE_KEY }}
       - name: Git checkout
         uses: actions/checkout@v2
 
