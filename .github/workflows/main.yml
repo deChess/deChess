@@ -14,6 +14,8 @@ jobs:
     - uses: borales/actions-yarn@v2.3.0
       with:
         cmd: build
+        env: 
+          WEB3STORAGE_KEY: ${{ secrets.WEB3STORAGE_KEY }}
     - name: Upload to IPFS
       uses: aquiladev/ipfs-action@v0.1.6-1
       id: upload
