@@ -34,6 +34,8 @@ const drawOffer = {
   drawAccepted: false,
 };
 
+const movesList = [];
+
 // source for PGN stuff: http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 const gameData = { // this will be converted to the JSON file that is uploaded to web3.storage
   streamID: '',
@@ -44,7 +46,7 @@ const gameData = { // this will be converted to the JSON file that is uploaded t
   white: {
     address: '', totalTime: 0, remainingTime: 0, rating: '-', increment: 0,
   },
-  readyTimes: { black: -1, white: -1 },
+  startTime: -1,
   moveTimes: [],
   result: '*',
   pgn: '', // put tags or not?
@@ -55,7 +57,7 @@ function ChessBoard(props) {
   // eslint-disable-next-line no-unused-vars
   const {
     settings: {
-      vsComputer, startColor, black, white,
+      vsComputer, startColor, black, white, streamId,
     }, client, code,
   } = props;
 
@@ -77,11 +79,9 @@ function ChessBoard(props) {
 
     gameData.uploader = gameData[startColor].address;
 
-    gameData.streamID = code.id;
+    gameData.streamID = streamId;
     gameDataInitialized = true;
   }
-
-  console.log(gameData);
 
   const home = gameData[startColor];
   const opponent = gameData[opponentColor];
@@ -106,22 +106,34 @@ function ChessBoard(props) {
     const game = chess.pgn();
     gameData.pgn = game;
     const moves = chess.history();
-    const movesObj = { whiteMoves: [], blackMoves: [] };
-    const moveList = [];
 
+    const movePairs = [];
     for (let i = 0; i < moves.length; i += 2) {
-      movesObj.whiteMoves.push(moves[i]);
-      movesObj.blackMoves.push(moves[i + 1]);
-      moveList.push(`${Math.ceil(i / 2) + 1}. ${moves[i]} ${moves.length % 2 === 1 && i === moves.length - 1 ? '' : moves[i + 1]}`);
+      movePairs.push([moves[i], moves[i + 1] !== undefined ? moves[i + 1] : '']);
+    }
+
+    const displayedMoves = [];
+    for (let i = 0; i < movePairs.length; i += 1) {
+      displayedMoves.push(`${i + 1}. ${movePairs[i][0]} ${movePairs[i][1]}`);
     }
 
     const log = document.getElementById('innerLog');
     log.scrollTop = log.scrollHeight;
-    log.innerHTML = `<p>${moveList.join('<br></br>')}</p>`;
+    log.innerHTML = `<p>${displayedMoves.join('<br></br>')}</p>`;
+
+    const moveHistory = chess.history();
+    if (movesList[movesList.length - 1] !== moveHistory[moveHistory.length - 1]) {
+      movesList.push(moveHistory[moveHistory.length - 1]);
+      gameData.moveTimes.push({ move: moveHistory[moveHistory.length - 1], time: Date.now() });
+      console.log(movesList);
+    }
+
+    if (vsComputer && !clockStarted) { clockStarted = true; gameData.startTime = Date.now(); }
 
     if (chess.in_threefold_repetition()) {
       drawOffer.drawOffered = true; // draw offer extended to both players if in 3-fold rep
     }
+
     if (chess.game_over()
     || gameData[startColor].remainingTime <= 0 || gameData[opponentColor].remainingTime <= 0
     || (drawOffer.drawOffered && drawOffer.drawAccepted)) {
@@ -182,6 +194,7 @@ function ChessBoard(props) {
         return uploadedFilesCID;
       }
     }
+
     return '';
   }
 
@@ -215,11 +228,10 @@ function ChessBoard(props) {
         stream: code,
       },
       (message) => {
-        console.log(message);
+        // console.log(message);
         // This function will be called when new messages occur
         if (message.type === 'move') {
-          gameData.moveTimes.push(Date.now());
-          if (!clockStarted) { clockStarted = true; console.log('game started!'); } // start clock if not started
+          if (!clockStarted) { gameData.startTime = Date.now(); clockStarted = true; console.log('game started!'); } // start clock if not started
           if (color !== turnColor()) {
             const { move } = message;
             const { from, to } = move;
