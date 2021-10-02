@@ -14,17 +14,18 @@ import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux'; */
 // import { start } from 'ipfs-core/src/components/network';
 // eslint-disable-next-line no-unused-vars
-import { makeFileObjects, storeFiles } from './storage';
+import { makeFileObjects, storeFiles, getAccessToken } from './storage';
 import queen from '../images/wQ.svg';
 import rook from '../images/wR.svg';
 import bishop from '../images/wB.svg';
 import knight from '../images/wN.svg';
 
 let doOnce = true; // this is for knowing when both players have joined, i.e. this becomes false
+let clockStarted = false; // let clock start at correct time
+const joined = []; // array of player addresses who have joined
+let gameDataInitialized = false;
 
 let uploaded = false;
-
-const joined = [];
 
 let gameOver = false;
 
@@ -58,29 +59,32 @@ function ChessBoard(props) {
     }, client, code,
   } = props;
 
-  let home = startColor === 'black' ? black : white;
-  let opponent = startColor === 'white' ? black : white;
   const opponentColor = startColor === 'white' ? 'black' : 'white';
   const colSymbols = { white: '⚪ - ', black: '⚫ - ' }; // uses non-breaking spaces
 
-  gameData.black.address = black.address;
-  gameData.black.totalTime = black.time;
-  gameData.black.remainingTime = black.time;
-  gameData.black.rating = black.rating;
-  gameData.black.increment = black.increment;
+  if (!gameDataInitialized) {
+    gameData.black.address = black.address;
+    gameData.black.totalTime = black.time;
+    gameData.black.remainingTime = black.time;
+    gameData.black.rating = black.rating;
+    gameData.black.increment = black.increment;
 
-  gameData.white.address = white.address;
-  gameData.white.totalTime = white.time;
-  gameData.white.remainingTime = white.time;
-  gameData.white.rating = white.rating;
-  gameData.white.increment = white.increment;
+    gameData.white.address = white.address;
+    gameData.white.totalTime = white.time;
+    gameData.white.remainingTime = white.time;
+    gameData.white.rating = white.rating;
+    gameData.white.increment = white.increment;
 
-  gameData.uploader = gameData[startColor].address;
+    gameData.uploader = gameData[startColor].address;
 
-  home = gameData[startColor];
-  opponent = gameData[opponentColor];
+    gameData.streamID = code.id;
+    gameDataInitialized = true;
+  }
 
-  gameData.streamID = code.id;
+  console.log(gameData);
+
+  const home = gameData[startColor];
+  const opponent = gameData[opponentColor];
 
   // localStorage.setItem('streamID', gameData.streamID); // used to test, might be used in future
 
@@ -95,54 +99,39 @@ function ChessBoard(props) {
   const [orientation, setOrientation] = useState(startColor);
 
   const currDate = new Date();
-  const dateToday = `${currDate.getFullYear()}.
-  ${currDate.getMonth() + 1 < 10 ? '0' : ''}${currDate.getMonth() + 1}.
-  ${currDate.getDate() < 10 ? '0' : ''}${currDate.getDate()}`;
+  const dateToday = `${currDate.getFullYear()}.${currDate.getMonth() + 1 < 10 ? '0' : ''}${currDate.getMonth() + 1}.${currDate.getDate() < 10 ? '0' : ''}${currDate.getDate()}`;
+  const UTCDateToday = `${currDate.getFullYear()}.${currDate.getMonth() + 1 < 10 ? '0' : ''}${currDate.getMonth() + 1}.${currDate.getDate() < 10 ? '0' : ''}${currDate.getDate()}`;
 
-  const UTCDateToday = `${currDate.getFullYear()}.
-                    ${currDate.getMonth() + 1 < 10 ? '0' : ''}${currDate.getMonth() + 1}.
-                    ${currDate.getDate() < 10 ? '0' : ''}${currDate.getDate()}`;
-
-  function updateLog() { // called at every move
-    gameData.moveTimes.push(Date.now());
+  function updateLog() { // called at every move (and then some)
     const game = chess.pgn();
     gameData.pgn = game;
-    const gameArr = [];
-    const moveStarts = [];
-    for (let i = 0; i < game.length; i += 1) {
-      if (game[i] === '.') {
-        if (i < 10) {
-          moveStarts.push(i - 1);
-        } else if (i < 100) {
-          moveStarts.push(i - 2);
-        } else {
-          moveStarts.push(i - 3);
-        }
-      }
+    const moves = chess.history();
+    const movesObj = { whiteMoves: [], blackMoves: [] };
+    const moveList = [];
+
+    for (let i = 0; i < moves.length; i += 2) {
+      movesObj.whiteMoves.push(moves[i]);
+      movesObj.blackMoves.push(moves[i + 1]);
+      moveList.push(`${Math.ceil(i / 2) + 1}. ${moves[i]} ${moves.length % 2 === 1 && i === moves.length - 1 ? '' : moves[i + 1]}`);
     }
-    for (let i = 0; i < moveStarts.length; i += 1) {
-      if (i + 1 !== moveStarts.length) {
-        gameArr.push(game.slice(moveStarts[i], moveStarts[i + 1]));
-      } else {
-        gameArr.push(game.slice(moveStarts[i]));
-      }
-    }
+
     const log = document.getElementById('innerLog');
     log.scrollTop = log.scrollHeight;
-    log.innerHTML = `<p>${gameArr.join('</p><p>')}</p>`;
+    log.innerHTML = `<p>${moveList.join('<br></br>')}</p>`;
 
     if (chess.in_threefold_repetition()) {
       drawOffer.drawOffered = true; // draw offer extended to both players if in 3-fold rep
     }
-    if (chess.game_over() || home.remainingTime <= 0 || opponent.remainingTime <= 0
+    if (chess.game_over()
+    || gameData[startColor].remainingTime <= 0 || gameData[opponentColor].remainingTime <= 0
     || (drawOffer.drawOffered && drawOffer.drawAccepted)) {
       gameOver = true;
       let whiteWon = false;
       let gameDrawn = false;
 
-      if (home.remainingTime <= 0) { // opponent wins on time
+      if (gameData[startColor].remainingTime <= 0) { // opponent wins on time
         whiteWon = startColor === 'black';
-      } else if (opponent.remainingTime <= 0) { // home wins on time
+      } else if (gameData[opponentColor].remainingTime <= 0) { // home wins on time
         whiteWon = startColor === 'white';
       } else if (chess.game_over() && !chess.in_checkmate()) { // draw/stalemate
         whiteWon = false;
@@ -150,7 +139,7 @@ function ChessBoard(props) {
 
       let finalComment = '';
 
-      if (home.remainingTime <= 0 || opponent.remainingTime <= 0) {
+      if (gameData[startColor].remainingTime <= 0 || gameData[opponentColor].remainingTime <= 0) {
         chess.set_comment(` ${whiteWon ? 'White' : 'Black'} wins on time. `);
         chess.header('Termination', 'Time forfeit');
       } else if (chess.in_stalemate()) {
@@ -185,6 +174,7 @@ function ChessBoard(props) {
         'Result', gameResult,
       );
       gameData.result = gameResult;
+      gameData.pgn = chess.pgn();
       if (!uploaded) {
         const uploadedFiles = makeFileObjects(gameData);
         const uploadedFilesCID = storeFiles(uploadedFiles);
@@ -228,6 +218,8 @@ function ChessBoard(props) {
         console.log(message);
         // This function will be called when new messages occur
         if (message.type === 'move') {
+          gameData.moveTimes.push(Date.now());
+          if (!clockStarted) { clockStarted = true; console.log('game started!'); } // start clock if not started
           if (color !== turnColor()) {
             const { move } = message;
             const { from, to } = move;
@@ -253,9 +245,6 @@ function ChessBoard(props) {
           if (!joined.includes(message.from)) {
             joined.push(message.from);
           }
-          if (message.from !== gameData[startColor].address) {
-            gameData.moveTimes[opponentColor] = Date.now();
-          }
         } else if (message.type === 'command') { // maybe add one for chat too?
           if (message.command === 'offer_draw') {
             drawOffer.drawOffered = true;
@@ -268,8 +257,6 @@ function ChessBoard(props) {
             time: Date.now(),
           };
           client.publish(code, msg);
-        } else if (message.type === 'start') {
-          gameData.readyTimes.message.from = message.time;
         }
         if (doOnce) { // both players have now joined
           const msg = {
@@ -296,7 +283,6 @@ function ChessBoard(props) {
       }
       )*/
     }
-    updateLog();
   }, [code, color]);
 
   // chess clock
@@ -307,17 +293,17 @@ function ChessBoard(props) {
       const homeTime = document.getElementById('homeTime');
       const opponentTime = document.getElementById('opponentTime');
       // eslint-disable-next-line max-len
-      if (homeTime != null && opponentTime != null && !gameOver && (joined.includes(opponent.address) || vsComputer)) {
+      if (homeTime != null && opponentTime != null && !gameOver && clockStarted) {
         // only change times if both players have joined, and homeTime and opponentTime aren't null
         if (turnColor() === startColor) { // decrease own time if own turn
-          home.remainingTime -= clockInterval;
-          homeTime.innerHTML = formatTime(home.remainingTime);
+          gameData[startColor].remainingTime -= clockInterval;
+          homeTime.innerHTML = formatTime(gameData[startColor].remainingTime);
         } else { // decrease opponent time if opponent turn
-          opponent.remainingTime -= clockInterval;
-          opponentTime.innerHTML = formatTime(opponent.remainingTime);
+          gameData[opponentColor].remainingTime -= clockInterval;
+          opponentTime.innerHTML = formatTime(gameData[opponentColor].remainingTime);
         }
       }
-      if (home.remainingTime <= 0 || opponent.remainingTime <= 0) {
+      if (gameData[startColor].remainingTime <= 0 || gameData[opponentColor].remainingTime <= 0) {
         setViewOnly(true);
         updateLog();
       }
@@ -331,6 +317,25 @@ function ChessBoard(props) {
       console.log('sync');
     }, 5000);
     return () => clearInterval(syncClock);
+  });
+
+  // ping opponent
+  useEffect(() => {
+    const poke = setInterval(() => {
+      if (startColor === 'white' && chess.turn() === 'w' && viewOnly) {
+        const msg = {
+          type: 'ready',
+          from: home.address,
+          message: 'pls respond :(',
+          time: Date.now(),
+        };
+        client.publish(code, msg);
+      }
+      if (joined.includes(gameData.black.address) && joined.includes(gameData.white.address)) {
+        clearInterval(poke); // stop poking if they respond
+      }
+    }, 1000);
+    return () => clearInterval(poke);
   });
 
   const randomMove = () => {
@@ -471,7 +476,7 @@ function ChessBoard(props) {
             <div className="userinfo">
               <div className="userAddress" style={{ textAlign: 'center' }}>{`${colSymbols[startColor]}‎‎‎${home.address}`}</div>
               <div className="rating">{gameData[startColor].rating !== '-' ? '' : `rating: ${gameData[startColor].rating}`}</div>
-              <div id="homeTime" className="userTime" style={{ textAlign: 'center' }}>{formatTime(home.remainingTime)}</div>
+              <div id="homeTime" className="userTime" style={{ textAlign: 'center' }}>{formatTime(gameData[startColor].remainingTime)}</div>
             </div>
           </div>
           <div id="buttons">
@@ -483,7 +488,7 @@ function ChessBoard(props) {
             <div className="userinfo">
               <div className="userAddress" style={{ textAlign: 'center' }}>{`${colSymbols[opponentColor]}‎‎‎${opponent.address}`}</div>
               <div className="rating">{gameData[opponentColor].rating !== '-' ? '' : `rating: ${gameData[opponentColor].rating}`}</div>
-              <div id="opponentTime" className="userTime" style={{ textAlign: 'center' }}>{formatTime(opponent.remainingTime)}</div>
+              <div id="opponentTime" className="userTime" style={{ textAlign: 'center' }}>{formatTime(gameData[opponentColor].remainingTime)}</div>
             </div>
           </div>
         </div>
