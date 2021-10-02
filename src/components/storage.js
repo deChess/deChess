@@ -1,9 +1,7 @@
 import { Web3Storage, File } from 'web3.storage/dist/bundle.esm.min';
 
 function getAccessToken() {
-  return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDY5MTVjRmNFOGNhZEM1MDdlNjkwN0Q1YzRBOUQ4QTUwN0EyRjIwOTIiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2MzI2MTE1Mzc3MzIsIm5hbWUiOiJkZUNoZXNzIGVhcmx5IGFjY2VzcyJ9.FTLtNtU4p0o--lonig3WmDgE2xkmepp3R9ujYxB_w6E';
-  // can't get the github action to work properly, will make new key in future
-  // return process.env.WEB3STORAGE_KEY;
+  return process.env.WEB3STORAGE_KEY;
 }
 
 function makeStorageClient() {
