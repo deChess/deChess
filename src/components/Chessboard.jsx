@@ -125,7 +125,7 @@ function ChessBoard(props) {
     if (movesList[movesList.length - 1] !== moveHistory[moveHistory.length - 1]) {
       movesList.push(moveHistory[moveHistory.length - 1]);
       gameData.moveTimes.push({ move: moveHistory[moveHistory.length - 1], time: Date.now() });
-      console.log(movesList);
+      // console.log(movesList);
     }
 
     if (vsComputer && !clockStarted) { clockStarted = true; gameData.startTime = Date.now(); }
