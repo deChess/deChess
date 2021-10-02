@@ -8,6 +8,7 @@ import { ethers } from 'ethers';
 
 const { Title } = Typography;
 const clockTime = 600000;
+let currTime = Date.now();
 let opponentAddress = '';
 let displayedCode = '';
 
@@ -36,7 +37,7 @@ function CreateModal(props) {
             }
             opponentAddress = ensDecoded.toLowerCase();
             try {
-              const currTime = Date.now();
+              currTime = Date.now();
               displayedCode = `${address}-${currTime}`;
               const stream = await client.createStream({
                 // id: `${address}/game`,
@@ -75,6 +76,7 @@ function CreateModal(props) {
               startColor: 'white',
               white: { address, time: clockTime, rating: '-' },
               black: { address: opponentAddress, time: clockTime, rating: '-' },
+              streamId: `${address}/dechess/game/${currTime}`,
             });
             if (code !== '') {
               history.push('/game');

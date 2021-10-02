@@ -47,6 +47,7 @@ function CreateModal(props) {
               startColor: 'black', // black if joining a game
               white: { address: opponentAddress, time: clockTime, rating: '-' },
               black: { address, time: clockTime, rating: '-' },
+              streamId: code,
             });
             if (code !== '') {
               history.push('/game');
