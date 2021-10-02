@@ -7,41 +7,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Git checkout
-        uses: actions/checkout@v2
-
-      - name: Use Node 14.15.3
-        uses: actions/setup-node
-        with:
-          node-version: 14.15.3
-
-      - name: Install Dependencies (prod)
-        run: yarn install --production
-
-      - name: Run Tests
-        run: yarn test --ci --silent --testpathIgnorePatterns=experimental
-        env:
-          WEB3STORAGE_KEY: ${{ secrets.WEB3STORAGE_KEY }}
-
-      - name: Build
-        run: yarn build
-        env:
-          WEB3STORAGE_KEY: ${{ secrets.WEB3STORAGE_KEY }}
-    
-      - name: Upload to IPFS
-        uses: aquiladev/ipfs-action@v0.1.6-1
-        id: upload
-        with:
-          path: ./build
-          service: pinata
-          pinataKey: ${{ secrets.PINATA_KEY }}
-          pinataSecret: ${{ secrets.PINATA_SECRET }}
-          pinataPinName: deChess
-
-      - name: Deploy to Skynet
-        uses: SkynetLabs/deploy-to-skynet-action@v2.0.1
-        with:
-          upload-dir: ./build
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          registry-seed: ${{ secrets.SKYNET_REGISTRY_SEED || '' }}
-          
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+        cache: 'npm'
+        cache-dependency-path: subdir/package-lock.json
+    - run: npm install
+    - run: npm test
+      env: 
+        WEB3STORAGE_KEY: ${{ secrets.WEB3STORAGE_KEY }}
+    - name: Upload to IPFS
+      uses: aquiladev/ipfs-action@v0.1.6-1
+      id: upload
+      with:
+        path: ./build
+        service: pinata
+        pinataKey: ${{ secrets.PINATA_KEY }}
+        pinataSecret: ${{ secrets.PINATA_SECRET }}
+        pinataPinName: deChess
+    - name: Deploy to Skynet
+      uses: SkynetLabs/deploy-to-skynet-action@v2.0.1
+      with:
+        upload-dir: ./build
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        registry-seed: ${{ secrets.SKYNET_REGISTRY_SEED || '' }}
+        
