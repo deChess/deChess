@@ -14,7 +14,7 @@ jobs:
     - run: yarn install
     - run: yarn build
       env: 
-        WEB3STORAGE_KEY: ${{ secrets.WEB3STORAGE_KEY }}
+        REACT_APP_WEB3STORAGE_KEY: ${{ secrets.WEB3STORAGE_KEY }}
     - name: Upload to IPFS
       uses: aquiladev/ipfs-action@v0.1.6-1
       id: upload
