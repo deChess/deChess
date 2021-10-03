@@ -1,8 +1,7 @@
 import { Web3Storage, File } from 'web3.storage/dist/bundle.esm.min';
 
 function getAccessToken() {
-  return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDY5MTVjRmNFOGNhZEM1MDdlNjkwN0Q1YzRBOUQ4QTUwN0EyRjIwOTIiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2MzI2MTE1Mzc3MzIsIm5hbWUiOiJkZUNoZXNzIGVhcmx5IGFjY2VzcyJ9.FTLtNtU4p0o--lonig3WmDgE2xkmepp3R9ujYxB_w6E';
-  // return process.env.WEB3STORAGE_API_KEY;
+  return process.env.REACT_APP_WEB3STORAGE_KEY;
 }
 
 function makeStorageClient() {
@@ -21,4 +20,4 @@ async function storeFiles(files) {
   return cid;
 }
 
-export { makeFileObjects, storeFiles };
+export { makeFileObjects, storeFiles, getAccessToken };
