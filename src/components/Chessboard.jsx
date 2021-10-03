@@ -257,12 +257,22 @@ function ChessBoard(props) {
     function handleResize() {
       // console.log('resized to: ', window.innerWidth, ' by ', window.innerHeight);
       const everything = document.getElementById('everything');
+      const moves = document.getElementById('outerLog');
       if (window.innerWidth / 16 >= window.innerHeight / 9) { // > 16:9
+        everything.style.backgroundSize = 'cover';
+        everything.style.backgroundColor = 'black';
         everything.style.flexDirection = 'row';
+        moves.style.flexDirection = 'row';
       } else if (window.innerWidth < window.innerHeight) { // < 1:1
+        everything.style.backgroundSize = 'cover';
+        everything.style.backgroundColor = 'black';
         everything.style.flexDirection = 'column';
+        moves.style.flexDirection = 'row';
       } else { // < 16:9 and > 1:1
+        everything.style.backgroundSize = 'cover';
+        everything.style.backgroundColor = 'black';
         everything.style.flexDirection = 'column';
+        moves.style.flexDirection = 'row';
       }
     }
     window.addEventListener('resize', handleResize);
@@ -271,6 +281,7 @@ function ChessBoard(props) {
   return (
     <div style={{
       background: '#2b313c',
+      backgroundSize: '500% 500%',
       height: '100vh',
     }}
     >
@@ -279,7 +290,7 @@ function ChessBoard(props) {
           <p>chat stuff goes here</p>
           <input id="textInput" />
         </div> */}
-        <div styles={{ display: 'flex' }} id="outerLog">
+        <div styles={{ display: 'flex', backgroundColour: 'black' }} id="outerLog">
           <p style={{
             fontSize: '20px',
             margin: '15px',
@@ -291,10 +302,10 @@ function ChessBoard(props) {
           <div styles={{ display: 'flex' }} id="innerLog" />
           <p style={{ margin: '10px', display: 'flex' }} />
         </div>
-        <div styles={{ display: 'flex' }} id="chessboard">
+        <div styles={{ display: 'flex', backgroundColour: 'black' }} id="chessboard">
           <Row>
             <Col span={12}>
-              <div styles={{ display: 'flex' }} id="chessboard">
+              <div styles={{ display: 'flex', backgroundColour: 'black' }} id="chessboard">
                 <Chessground
                   width="88vh"
                   height="88vh"
@@ -321,7 +332,7 @@ function ChessBoard(props) {
             </Col>
           </Row>
         </div>
-        <div styles={{ display: 'flex' }} id="dashboard">
+        <div styles={{ display: 'flex', backgroundColour: 'black' }} id="dashboard">
           <div styles={{ display: 'flex' }} className="user">
             <div className="userinfo">
               <div className="username">{home.username}</div>
@@ -344,7 +355,6 @@ function ChessBoard(props) {
             <div id="opponentTime" className="userTime">{formatTime(opponent.time)}</div>
           </div>
         </div>
-
       </div>
       <Modal visible={selectVisible} footer={null} closable={false} centered>
         <div style={{ textAlign: 'center', cursor: 'pointer' }}>
