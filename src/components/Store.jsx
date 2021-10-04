@@ -83,6 +83,29 @@ function Store(props) {
       await gammaTx.wait();
     }
   };
+
+  /* function mintAnNFTTest(chain, contractAddress, metadataUri, mintToAddress) {
+    fetch('https://api.nftport.xyz/mint_nft', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'c0d1ad1d-c062-4e4e-be42-983a11cc044e',
+      },
+      body: `{"chain":"${chain}",
+      "contract_address":"${contractAddress}",
+      "metadata_uri":"${metadataUri}",
+      "mint_to_address":"${mintToAddress}"}`,
+    })
+      .then((response) => {
+        // eslint-disable-next-line no-console
+        console.log(response);
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      });
+  } */
+
   return (
     <div style={{
       height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex',
