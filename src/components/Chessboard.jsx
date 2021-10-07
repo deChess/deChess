@@ -34,7 +34,7 @@ const drawOffer = {
   drawAccepted: false,
 };
 
-const movesList = [];
+// const movesList = [];
 
 const elapsedTime = { white: 0, black: 0 };
 
@@ -53,7 +53,6 @@ const gameData = { // this will be converted to the JSON file that is uploaded t
   result: '*',
   pgn: '', // put tags or not?
   chat: [],
-  latency: 0,
 };
 
 function ChessBoard(props) {
@@ -124,28 +123,6 @@ function ChessBoard(props) {
     log.scrollTop = log.scrollHeight;
     log.innerHTML = `<p>${displayedMoves.join('<br></br>')}</p>`;
 
-    const moveHistory = chess.history();
-    if (movesList[movesList.length - 1] !== moveHistory[moveHistory.length - 1]) {
-      // these requirements are here because one move may have multiple messages
-
-      const lastMoveObj = gameData.moveTimes[gameData.moveTimes.length - 1];
-      // eslint-disable-next-line max-len
-      const lastMoveTime = lastMoveObj !== undefined ? Date.now() - lastMoveObj.time : 0; // time since last move
-      elapsedTime[opponentColor] -= gameData.latency; // lag comp, adj'd when messages are rec'vd
-
-      if (movesList.length % 2 === 0) {
-        elapsedTime.white += lastMoveTime;
-      } else {
-        elapsedTime.black += lastMoveTime;
-      }
-
-      movesList.push(moveHistory[moveHistory.length - 1]);
-      gameData.moveTimes.push({
-        move: moveHistory[moveHistory.length - 1],
-        time: Date.now(), // no lag comp here
-      });
-    }
-
     if (vsComputer && !clockStarted) { clockStarted = true; gameData.startTime = Date.now(); }
 
     if (chess.in_threefold_repetition()) {
@@ -170,7 +147,7 @@ function ChessBoard(props) {
       let finalComment = '';
 
       if (gameData[startColor].remainingTime <= 0 || gameData[opponentColor].remainingTime <= 0) {
-        chess.set_comment(` ${whiteWon ? 'White' : 'Black'} wins on time. `);
+        finalComment = ` ${whiteWon ? 'White' : 'Black'} wins on time. `;
         chess.header('Termination', 'Time forfeit');
       } else if (chess.in_stalemate()) {
         finalComment = ' Draw by stalemate. ';
@@ -245,17 +222,18 @@ function ChessBoard(props) {
       client.subscribe({
         stream: code,
       },
-      (message) => {
+      (message, metadata) => {
         // This function will be called when new messages occur
         // note: will also receive own messages
-        gameData.latency = message.time !== undefined ? Date.now() - message.time : 0;
+        const msgTime = metadata.messageId.timestamp;
+        const currTime = Date.now();
+        const msgLatency = currTime - msgTime;
         if (message.type === 'move') {
           if (!clockStarted) {
-            gameData.startTime = message.time;
+            gameData.startTime = msgTime;
             clockStarted = true; // start clock if not started
             console.log('game started!');
           }
-
           if (color !== turnColor()) { // opponent's move
             const { move } = message;
             const { from, to, promotion } = move;
@@ -270,11 +248,32 @@ function ChessBoard(props) {
               }
             }
             const moveResult = chess.move({ from, to, promotion });
-            if (moveResult) {
+            // console.log(move, moveResult);
+            const lastMoveSAN = chess.history()[chess.history().length - 1]; // last move in SAN
+            if (moveResult) { // move successful
               setFen(chess.fen());
               setLastMove([from, to]);
               setChecked(chess.in_check());
             }
+            if (gameData.moveTimes.length !== chess.history().length) {
+              gameData.moveTimes.push({
+                move: lastMoveSAN,
+                time: msgTime, // streamr time
+                latency: msgLatency,
+              });
+              const lastLastMove = gameData.moveTimes[gameData.moveTimes.length - 2];
+              const lastMoveTime = lastLastMove ? msgTime - lastLastMove.time : 0;
+              // time between curr and prior move, if there is only 1 move then time to move is 0
+              // if white just moved, then lastMoveTime is the time that white to move,
+              // and vice versa for black
+              if (chess.history().length % 2 === 1) { // even move history means white just moved
+                elapsedTime.white += lastMoveTime;
+              } else {
+                elapsedTime.black += lastMoveTime;
+              }
+              // console.log(`move ${lastMoveSAN} was played in ${lastMoveTime} milliseconds.`);
+            }
+            // console.log(move, gameData);
             setViewOnly(false); // can play now
             updateLog();
           } else {
@@ -321,22 +320,28 @@ function ChessBoard(props) {
     const chessClock = setInterval(() => {
       const homeTime = document.getElementById('homeTime');
       const opponentTime = document.getElementById('opponentTime');
+      const whiteTime = startColor === 'white' ? homeTime : opponentTime;
+      const blackTime = startColor === 'black' ? homeTime : opponentTime;
       const lastMoveObj = gameData.moveTimes[gameData.moveTimes.length - 1];
       const timeFromLastMove = lastMoveObj !== undefined ? Date.now() - lastMoveObj.time : 0;
-      // eslint-disable-next-line max-len
+      const whiteToMove = gameData.moveTimes.length % 2 === 0;
+      // ^ time taken for current move
       if (homeTime != null && opponentTime != null && !gameOver && clockStarted) {
-        // only change times if both players have joined, and homeTime and opponentTime aren't null
-        if (turnColor() === startColor) { // decrease own time if own turn
-          // eslint-disable-next-line max-len
-          gameData[startColor].remainingTime = gameData[startColor].totalTime - timeFromLastMove - elapsedTime[startColor];
-          homeTime.innerHTML = formatTime(gameData[startColor].remainingTime);
-        } else { // decrease opponent time if opponent turn
-          // eslint-disable-next-line max-len
-          gameData[opponentColor].remainingTime = gameData[opponentColor].totalTime - timeFromLastMove - elapsedTime[opponentColor];
-          opponentTime.innerHTML = formatTime(gameData[opponentColor].remainingTime);
+        // eslint-disable-next-line max-len
+        const newWhiteRemainingTime = gameData.white.totalTime - elapsedTime.white - (whiteToMove ? timeFromLastMove : 0);
+        // eslint-disable-next-line max-len
+        const newBlackRemainingTime = gameData.black.totalTime - elapsedTime.black - (!whiteToMove ? timeFromLastMove : 0);
+        if (newWhiteRemainingTime < gameData.white.remainingTime) {
+          gameData.white.remainingTime = newWhiteRemainingTime;
+          whiteTime.innerHTML = formatTime(gameData.white.remainingTime);
+        }
+        if (newBlackRemainingTime < gameData.black.remainingTime) {
+          gameData.black.remainingTime = newBlackRemainingTime;
+          blackTime.innerHTML = formatTime(gameData.black.remainingTime);
         }
       }
       if (gameData[startColor].remainingTime <= 0 || gameData[opponentColor].remainingTime <= 0) {
+        gameOver = true;
         setViewOnly(true); // moves can no longer be played
         updateLog(); // update log one last time after game is over
       }
@@ -413,7 +418,7 @@ function ChessBoard(props) {
         });
       }
     }
-    updateLog();
+    // updateLog();
   };
 
   const promotion = (e) => {
@@ -438,7 +443,7 @@ function ChessBoard(props) {
         // fen: chess.fen(),
       });
     }
-    updateLog();
+    // updateLog();
   };
 
   const calcMovable = () => {
