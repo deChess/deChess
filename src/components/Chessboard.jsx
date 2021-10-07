@@ -45,7 +45,6 @@ function ChessBoard(props) {
   const [color, setColor] = useState(startColor);
   // eslint-disable-next-line no-unused-vars
   const [orientation, setOrientation] = useState(startColor);
-
   function updateLog() {
     const game = chess.pgn();
     const gameArr = [];

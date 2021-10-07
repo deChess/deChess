@@ -15,6 +15,7 @@ import Store from './components/Store';
 import Collection from './components/Collection';
 import 'antd/dist/antd.css';
 import './App.css';
+import Waku from './components/waku';
 
 function App() {
   const [settings, setSettings] = useState({ vsComputer: false });
@@ -78,7 +79,10 @@ function App() {
         <Route path="/404">
           <div>404 not found</div>
         </Route>
-        <Redirect to="/404" />
+
+        <Route path="/waku">
+          <Waku />
+        </Route>
       </Switch>
       {useLocation().pathname !== '/game' && <Footer>Made with &#10084;&#65039;</Footer>}
     </Layout>
