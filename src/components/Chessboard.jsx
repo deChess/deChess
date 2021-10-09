@@ -19,6 +19,19 @@ import bishop from '../images/wB.svg';
 import knight from '../images/wN.svg';
 // import Clock from './clock';
 // import * as clockActions from '../actions';
+/* eslint-disable */ 
+import '../App.css';
+import { Waku, WakuMessage } from 'js-waku';
+import protons from 'protons';
+
+const ContentTopic = `/min-react-js-chat/1/chat/proto`;
+
+const proto = protons(`
+message SimpleChatMessage {
+  uint64 timestamp = 1;
+  string text = 2;
+}
+`);
 
 let doOnce = true; // this is for knowing when both players have joined, i.e. this becomes false
 
@@ -30,6 +43,10 @@ const opponent = {
 };
 
 function ChessBoard(props) {
+  const [waku, setWaku] = React.useState(undefined);
+  const [wakuStatus, setWakuStatus] = React.useState('None');
+  const [sendCounter, setSendCounter] = React.useState(0);
+  const [messages, setMessages] = React.useState([]);
   // eslint-disable-next-line no-unused-vars
   const { settings: { vsComputer, startColor }, client, code } = props;
   // eslint-disable-next-line no-console
@@ -45,6 +62,7 @@ function ChessBoard(props) {
   const [color, setColor] = useState(startColor);
   // eslint-disable-next-line no-unused-vars
   const [orientation, setOrientation] = useState(startColor);
+  
   function updateLog() {
     const game = chess.pgn();
     const gameArr = [];
@@ -91,6 +109,7 @@ function ChessBoard(props) {
   const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
 
   useEffect(() => {
+    
     if (doOnce && startColor === 'black') {
       setViewOnly(true);
     }
@@ -154,6 +173,70 @@ function ChessBoard(props) {
 
   // chess clock
   const clockInterval = 200; // use this to change how fast the clock ticks
+  useEffect(() => {
+    if (!!waku) return;
+    if (wakuStatus !== 'None') return;
+
+    setWakuStatus('Starting');
+
+    Waku.create({ bootstrap: true }).then((waku) => {
+    setWaku(waku);
+    setWakuStatus('Connecting');
+    waku.waitForConnectedPeer().then(() => {
+    setWakuStatus('Ready');
+    });
+    });
+    }, [waku, wakuStatus]);
+  // Need to keep the same reference around to add and delete from relay observer
+  const processIncomingMessage = React.useCallback((wakuMessage) => {
+    if (!wakuMessage.payload) return;
+
+    const { text, timestamp } = proto.SimpleChatMessage.decode(
+    wakuMessage.payload
+    );
+
+    const time = new Date();
+    time.setTime(timestamp);
+    const message = { text, timestamp: time };
+
+    setMessages((currMessages) => {
+    return [message].concat(currMessages);
+    });
+}, []);
+
+React.useEffect(() => {
+    if (!waku) return;
+
+    waku.relay.addObserver(processIncomingMessage, [ContentTopic]);
+
+    return function cleanUp() {
+    waku.relay.deleteObserver(processIncomingMessage, [ContentTopic]);
+    };
+}, [waku, wakuStatus, processIncomingMessage]);
+
+const sendMessageOnClick = () => {
+    if (wakuStatus !== 'Ready') return;
+
+    sendMessage(`Here is message #${sendCounter}`, new Date(), waku).then(() =>
+    console.log('Message sent')
+    );
+
+    setSendCounter(sendCounter + 1);
+};
+
+
+function sendMessage(message, timestamp, waku) {
+  const time = timestamp.getTime();
+
+  const payload = proto.SimpleChatMessage.encode({
+    timestamp: time,
+    text: message,
+  });
+
+  return WakuMessage.fromBytes(payload, ContentTopic).then((wakuMessage) =>
+    waku.relay.send(wakuMessage)
+  );
+}
   useEffect(() => {
     const start = Date.now();
     const chessClock = setInterval(() => {
@@ -247,6 +330,7 @@ function ChessBoard(props) {
       dests,
     };
   };
+  
 
   // change page layout depending on window aspect ratio (| for side-by-side and + for stacked)
   // moves | chessboard | dashboard if > 16:9
@@ -285,11 +369,8 @@ function ChessBoard(props) {
     }}
     >
       <div styles={{ display: 'flex' }} id="everything">
-        {/* <div id="chatbox">
-          <p>chat stuff goes here</p>
-          <input id="textInput" />
-        </div> */}
-        <div styles={{ display: 'flex', backgroundColour: 'black' }} id="outerLog">
+        {      
+          <div styles={{ display: 'flex', backgroundColour: 'black' }} id="outerLog">
           <p style={{
             fontSize: '20px',
             margin: '15px',
@@ -298,9 +379,10 @@ function ChessBoard(props) {
           >
             Moves
           </p>
+        
           <div styles={{ display: 'flex' }} id="innerLog" />
           <p style={{ margin: '10px', display: 'flex' }} />
-        </div>
+        </div>}
         <div styles={{ display: 'flex', backgroundColour: 'black' }} id="chessboard">
           <Row>
             <Col span={12}>
@@ -354,6 +436,26 @@ function ChessBoard(props) {
             <div id="opponentTime" className="userTime">{formatTime(opponent.time)}</div>
           </div>
         </div>
+        <div id="App">
+          <header id="App-header">
+            <p>{wakuStatus}</p>
+            <input type="text" id="message"></input>
+            <button onClick={sendMessageOnClick} disabled={wakuStatus !== 'Ready'}>
+            Send Message
+            </button>
+            <ul>
+            {messages.map((msg) => {
+                return (
+                <li>
+                    <p>
+                    {msg.timestamp.toString()}: {msg.text}
+                    </p>
+                </li>
+                );
+            })}
+            </ul>
+          </header>
+          </div>
       </div>
       <Modal visible={selectVisible} footer={null} closable={false} centered>
         <div style={{ textAlign: 'center', cursor: 'pointer' }}>
