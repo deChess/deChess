@@ -1,0 +1,21 @@
+.piece {
+  text-align: center;
+  position: relative;
+  border-radius: 10px;
+  border: 100px;
+  margin-left: 30%;
+  margin-right: 30%;
+  background-color: steelblue;
+}
+
+.opensea {
+  border: 5px solid white;
+  border-radius: 30px;
+  width: 60px;
+  margin: 10px;
+  margin-bottom: 20px;
+}
+
+.opensea:hover {
+  border-color: rgb(0, 49, 184);
+}

@@ -35,8 +35,9 @@ function NavBar(props) {
   return (
     <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['play']}>
       <Menu.Item key="play"><Link to="/play">Play</Link></Menu.Item>
-      <Menu.Item key="store"><Link to="/store">Store</Link></Menu.Item>
+      { /* <Menu.Item key="store"><Link to="/store">Store</Link></Menu.Item> */ }
       <Menu.Item key="collection"><Link to="/collection">Collection</Link></Menu.Item>
+      <Menu.Item key="minter"><Link to="/minter">Minter</Link></Menu.Item>
       <Menu.Item
         onClick={async () => {
           if (window.ethereum) {

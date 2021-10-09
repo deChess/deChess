@@ -13,6 +13,7 @@ import MainMenu from './components/MainMenu';
 import NavBar from './components/NavBar';
 import Store from './components/Store';
 import Collection from './components/Collection';
+import Minter from './components/Minter';
 import 'antd/dist/antd.css';
 import './App.css';
 
@@ -71,7 +72,12 @@ function App() {
         </Route>
         <Route path="/collection">
           <Content>
-            <Collection />
+            <Collection address={address} />
+          </Content>
+        </Route>
+        <Route path="/minter">
+          <Content>
+            <Minter address={address} />
           </Content>
         </Route>
 

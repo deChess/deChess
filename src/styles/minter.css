@@ -1,0 +1,296 @@
+body {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    background-color: rgba(0,0,0,.85);
+  }
+  
+  .menu {
+  height: 64px;
+  background-color: #001529;
+  margin-top: 0px;
+  }
+  
+  .menuitem {
+  float:left;
+  padding: 20px;
+  height: 24px;
+  font-size: 14px;  
+  }
+  
+  .menuitem a {
+  color:  hsla(0,0%,100%,.65);
+  text-decoration: none;
+  }
+  
+  .menuitem:hover {
+  background-color: #0093fb;
+  }
+  
+  #mintlink, #storelink, #connect {
+  background-color: #0093fb;
+  }
+  
+  #connect {
+  float: right;
+  }
+  
+  #saleitems {
+  text-align: center;
+  }
+  
+  #saleitems img {
+  height: 400px;
+  }
+  
+  #preview {
+  height: 250px;
+  }
+  
+  #imageDiv {
+  margin: 30px;
+  width: 270px;
+  float:left;
+  }
+  
+  #form {
+  float: left;
+  color: black;    
+  width: 400px;  
+  }
+  
+  #form input {
+  height: 32px;
+  width: 400px;
+  padding: 5px;
+  }
+  
+  .label {
+  color: black;    
+  }
+  
+  #mintButton {
+    height: 50px;
+    width: 120px;
+    font-size: 25px;
+  }
+  
+  .socialmediaicon{
+    height: 50px;
+  }
+  
+  
+  #abookimg
+  {
+    height: 30px;
+  }
+  #loading
+  {
+    display: none;
+    width: 300px;
+  }
+  
+  #loading img
+  {
+    
+   width: 300px;
+  }
+  .stakebox
+  {
+    width:500px;
+  }
+  .staked
+  {
+    background-color: #444444;
+  }
+  
+  
+  .avatarimage
+  {
+    border-radius: 25%;
+    height: 50px;
+  }
+  
+  .listImage
+  {
+    border-radius: 5%;
+    height: 300px;
+  }
+  
+  li
+  {
+    list-style: none;
+  }
+  
+  #paragraph, #header, #tandc, #airdrop_
+  {
+    display:none;
+  }
+  
+  #about-paragraph
+  {
+    width: 100%;
+  }
+  
+  .commonsitem
+  {
+    padding:8px;
+  }
+  
+  
+  .item
+  {
+    
+   
+    width: 100%;
+  text-align: left;
+  
+    padding:8px;
+    text-align: left;
+  
+  display: inline-block;
+  
+  }
+  
+  .itemImage
+  {
+    max-height: 250px;
+    max-width: 95%;
+    vertical-align: middle;
+    text-align: left;
+    float: left;
+    padding-right: 48px;
+  
+  }
+  
+  #preview
+  {
+    max-height: 800px;
+    max-width: 95%;
+  }
+  
+  
+  #loading
+  {
+  
+    width: 300px;
+  }
+  
+  #loading img
+  {
+   width: 300px;
+  }
+  
+  .creator
+  {
+    font-size: 10px;
+  }
+  
+  .username
+  {
+    font-size: 20px;
+  }
+  
+  .nftview
+  {
+    max-width: 400px;
+  }
+  
+  .deployButton
+  {
+    padding-left: 264px;
+  }
+  
+  .label
+  {
+    font-size: 22px;
+    color: black;
+  }
+  
+  #warningAddress,#warningAmount
+  {
+    font-size: 18px;
+    color: #ff0000;
+    display: none;
+  }
+  
+  
+  .txlist td
+  {
+    padding: 8px;
+  }
+  
+  .mmPanel
+  {
+    float:right;
+  }
+  
+  .txlist a
+  {
+    color: darkslategray;
+  }
+  
+  #abook
+  {
+    border: 1px dotted;
+   
+  }
+  
+  #abookimg
+  {
+    height: 30px;
+  }
+  
+  .addressitem
+  {
+    padding: 8px;
+  }
+  
+  .imageItem
+  {
+  
+  white-space: nowrap;
+  }
+  .helper {
+    display: inline-block;
+  
+    vertical-align: middle;
+  }
+  
+  html, body {
+  height: 100%;
+    
+  }
+  
+  .full-height {
+  height: 100%;
+  }
+  
+  .socialmediaicon{
+    height: 50px;
+  }
+  
+  .tagButtons{
+    padding: 8px;
+  }
+  
+  .tooltip
+  {
+    width: 100%;
+  }
+  
+  .imageBox
+  {
+    width: 360px;
+  }
+  
+  .imageItem h2, .imageItem h3,.imageItem h5
+  {
+    margin-left: 380px;
+  }
+  
+  a
+  {
+    color: #222;
+    text-decoration:none;
+    text-decoration-thickness:0;
+  }
+  
