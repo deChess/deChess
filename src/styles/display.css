@@ -19,3 +19,10 @@
 .opensea:hover {
   border-color: rgb(0, 49, 184);
 }
+
+#loader {
+  margin: auto;
+  display: block;
+  width: 250px;
+  height: 250px;
+}

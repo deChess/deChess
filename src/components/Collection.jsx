@@ -42,11 +42,13 @@ function Collection(props) {
                   }
                 }
                 for (let k = 0; k < validNFTs.length; k += 1) {
-                  validNFTs[k].contract_address = '0x0aee6e01d4bd12a9d80aa2fa64a2b53093fafda7';
+                  validNFTs[k].contract_address = 'matic/0x0aee6e01d4bd12a9d80aa2fa64a2b53093fafda7';
                 }
                 newChessNFTs = raribleNFTs.concat(validNFTs);
                 setChessNFTs(newChessNFTs);
                 // console.log('final chess nfts: ', chessNFTs);
+                const loader = document.getElementById('loader');
+                loader.style.display = 'none';
               }
             }
           })
@@ -65,6 +67,7 @@ function Collection(props) {
       {chessNFTs.map((piece) => (
         <Piece piece={piece} />
       )) }
+      <img src="loader.gif" alt="loading" id="loader" />
     </div>
   );
 }
