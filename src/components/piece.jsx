@@ -16,16 +16,16 @@ function Piece(piece) {
       <div className="piece" id={pieceData.name.replace(/\s/g, '')}>
         <br />
         <h1>{pieceData.name}</h1>
-        <img src={pieceData.image} alt="oops, looks like this image couldn't load" style={{ maxHeight: '400px' }} />
-        <h2 className="piece-description">
+        <img src={pieceData.image} alt="oops, looks like this image couldn't load" style={{ maxHeight: '300px' }} />
+        <h3 className="piece-description">
           {`description: ${pieceData.description}`}
-        </h2>
-        <h2 className="type">
+        </h3>
+        <h3 className="type">
           {`type: ${attributes['piece type']}`}
-        </h2>
-        <h2 className="color">
+        </h3>
+        <h3 className="color">
           {`color: ${attributes.color}`}
-        </h2>
+        </h3>
         <a href={`https://opensea.io/assets/${contractAddress}/${tokenID}`} target="_blank" rel="noreferrer">
           <img className="opensea" src="opensea.png" alt="OpenSea" />
         </a>

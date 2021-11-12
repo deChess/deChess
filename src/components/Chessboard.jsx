@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import React, { useState, useEffect /* , Component */ } from 'react';
 import {
-  Button, Col, Modal, Row,
+  Button, Col, Modal, Row, Input,
 } from 'antd';
 import Chess from 'chess.js';
 import Chessground from 'react-chessground';
@@ -20,6 +20,8 @@ import rook from '../images/wR.svg';
 import bishop from '../images/wB.svg';
 import knight from '../images/wN.svg';
 
+const { Search } = Input;
+
 let doOnce = true; // this is for knowing when both players have joined, i.e. this becomes false
 let clockStarted = false; // let clock start at correct time
 const joined = []; // array of player addresses who have joined
@@ -35,6 +37,12 @@ const drawOffer = {
 };
 
 // const movesList = [];
+
+const addressShorthand = (address) => (address === 'computer' ? address : `${address.substring(0, 5)}...${address.substring(address.length - 5, address.length)}`);
+
+// eslint-disable-next-line no-restricted-globals
+// eslint-disable-next-line max-len
+// const getTimeControl = (totalTime, increment) => `${parseInt(totalTime / 60000, 10)}+${isNaN(increment) ? 0 : parseInt(increment / 1000, 10)}`;
 
 const elapsedTime = { white: 0, black: 0 };
 
@@ -193,6 +201,21 @@ function ChessBoard(props) {
     return '';
   }
 
+  const updateChat = (msg) => {
+    if (gameData.chat[gameData.chat.length - 1] !== msg) { // in case of duplicate received msgs
+      gameData.chat.push(msg);
+    }
+    const chat = document.getElementById('chatLog');
+    chat.scrollTop = chat.scrollHeight;
+
+    const parsedChat = [];
+    for (let i = 0; i < gameData.chat.length; i += 1) {
+      parsedChat.push(`<p><b>${addressShorthand(gameData.chat[i].from)}</b>: ${gameData.chat[i].message}<p/>`);
+    }
+
+    chat.innerHTML = `${parsedChat.join('')}`;
+  };
+
   const formatTime = (msecs) => {
     const tenth = parseInt((msecs / 100) % 10, 10);
     let secs = parseInt((msecs / 1000) % 60, 10);
@@ -287,6 +310,9 @@ function ChessBoard(props) {
           if (message.command === 'offer_draw') {
             drawOffer.drawOffered = true;
           }
+        } else if (message.type === 'chat') {
+          console.log(`message sent: ${message.message}`);
+          updateChat(message);
         }
         if (message.type === 'ready') {
           const msg = {
@@ -414,7 +440,7 @@ function ChessBoard(props) {
           { from, to, promotion: 'q' },
           from: gameData[startColor].address,
           time: Date.now(),
-          // fen: chess.fen(),
+          fen: chess.fen(),
         });
       }
     }
@@ -440,7 +466,7 @@ function ChessBoard(props) {
         { from, to, promotion: e },
         from: gameData[startColor].address,
         time: Date.now(),
-        // fen: chess.fen(),
+        fen: chess.fen(),
       });
     }
     // updateLog();
@@ -462,6 +488,23 @@ function ChessBoard(props) {
 
   const boardsize = Math.round((Math.min(window.innerWidth, window.innerHeight) * 0.91) / 8) * 8;
 
+  const sendMessage = (msg) => {
+    document.getElementById('chatSend').value = '';
+    if (msg !== '' && !vsComputer) {
+      client.publish(code, {
+        type: 'chat',
+        from: gameData[startColor].address,
+        time: Date.now(),
+        message: msg,
+      });
+      console.log(msg);
+    } else if (vsComputer) {
+      console.log("can't send messages to the computer");
+    } else {
+      console.log("message can't be empty!");
+    }
+  };
+
   // eslint-disable-next-line no-return-assign
   return (
     <div style={{
@@ -470,21 +513,18 @@ function ChessBoard(props) {
     }}
     >
       <div id="everything">
-        {/* <div id="chatbox">
-          <p>chat stuff goes here</p>
-          <input id="textInput" />
-        </div> */}
-        <div id="outerLog">
+        <div id="dashboard">
           <p style={{
             fontSize: '20px',
-            margin: '15px',
             textAlign: 'center',
           }}
           >
-            Moves
+            Chat
           </p>
-          <div id="innerLog" />
-          <p style={{ margin: '10px' }} />
+          <div id="chat">
+            <div id="chatLog" />
+            <Search enterButton="send" placeholder="say something nice :)" id="chatSend" onSearch={sendMessage} />
+          </div>
         </div>
         <div id="chessboard">
           <Row>
@@ -516,21 +556,29 @@ function ChessBoard(props) {
           </Row>
         </div>
         <div id="dashboard">
+          <p style={{
+            fontSize: '20px',
+            textAlign: 'center',
+          }}
+          >
+            Moves
+          </p>
+          <div id="innerLog" />
           <div className="user">
             <div className="userinfo">
-              <div className="userAddress" style={{ textAlign: 'center' }}>{`${colSymbols[startColor]}‎‎‎${home.address}`}</div>
+              <div className="userAddress" style={{ textAlign: 'center' }}>{`${colSymbols[startColor]}‎‎‎${addressShorthand(home.address)}`}</div>
               <div className="rating">{gameData[startColor].rating !== '-' ? '' : `rating: ${gameData[startColor].rating}`}</div>
               <div id="homeTime" className="userTime" style={{ textAlign: 'center' }}>{formatTime(gameData[startColor].remainingTime)}</div>
             </div>
           </div>
           <div id="buttons">
-            <Button style={{ width: '9vw', margin: '10px' }}>offer draw</Button>
-            <Button style={{ width: '3vw', margin: '10px' }} onClick={() => setOrientation(flipBoard())}>🔄</Button>
-            <Button style={{ width: '9vw', margin: '10px' }}>resign</Button>
+            <Button style={{ width: '7vw', margin: '6px' }}>offer draw</Button>
+            <Button style={{ width: '4vw', margin: '6px' }} onClick={() => setOrientation(flipBoard())}>🔄</Button>
+            <Button style={{ width: '7vw', margin: '6px' }}>resign</Button>
           </div>
           <div className="user">
             <div className="userinfo">
-              <div className="userAddress" style={{ textAlign: 'center' }}>{`${colSymbols[opponentColor]}‎‎‎${opponent.address}`}</div>
+              <div className="userAddress" style={{ textAlign: 'center' }}>{`${colSymbols[opponentColor]}‎‎‎${addressShorthand(opponent.address)}`}</div>
               <div className="rating">{gameData[opponentColor].rating !== '-' ? '' : `rating: ${gameData[opponentColor].rating}`}</div>
               <div id="opponentTime" className="userTime" style={{ textAlign: 'center' }}>{formatTime(gameData[opponentColor].remainingTime)}</div>
             </div>

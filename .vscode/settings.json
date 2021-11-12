@@ -8,5 +8,7 @@
     "eslint.format.enable": true,
     "editor.codeActionsOnSave": {
         "source.fixAll": true
-    }
+    },
+    "editor.detectIndentation": true,
+    "editor.tabSize": 2,
 }

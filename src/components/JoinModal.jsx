@@ -45,8 +45,12 @@ function CreateModal(props) {
             setSettings({
               vsComputer: false,
               startColor: 'black', // black if joining a game
-              white: { address: opponentAddress, time: clockTime, rating: '-' },
-              black: { address, time: clockTime, rating: '-' },
+              white: {
+                address: opponentAddress, time: clockTime, rating: '-', increment: 0,
+              },
+              black: {
+                address, time: clockTime, rating: '-', increment: 0,
+              },
               streamId: code,
             });
             if (code !== '') {

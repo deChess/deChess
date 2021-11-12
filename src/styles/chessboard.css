@@ -3,10 +3,10 @@ body {
 }
 
 .userTime {
-    font-size: 50px;
+    font-size: 40px;
     color: black;
     border: 3px solid black;
-    margin: 2%;
+    margin: 1%;
     text-align: center;
 }
 
@@ -17,17 +17,17 @@ body {
 
 .userAddress {
     width: 100%;
-    font-size: 16px;
+    font-size: 18px;
     color: black;
 }
 
 .rating {
     color: black;
-    font-size: 16px;
+    font-size: 18px;
+    text-align: center;
 }
 
 .user {
-    margin: 2%;
     margin-left: 5%;
     display: flex;
     justify-content: space-between;
@@ -42,35 +42,37 @@ body {
 
 #outerLog {
     background-color: aliceblue;
-    width: 22%;
-    margin: 60px;
-    margin-top: 8%;
+    width: 18%;
     border: 3px aliceblue;
     border-radius: 10px;
-    height: 70vh;
+    height: 30vh;
     overflow: hidden;
 }
 
-#innerLog {
-    margin-bottom: 30px;
+#innerLog, #chatLog {
+    padding-bottom: 5px;
     font-size: large;
     background-color: aliceblue;
-    height: 70vh;
+    height: 25vh;
+    width: 100%;
     overflow-y: auto;
     text-align: center;
 }
 
-#chatbox {
-    background-color: aliceblue;
-    width: 22%;
-    margin: 60px;
-    padding: 10px;
-    border-radius: 10px;
-    border-color: aliceblue;
+#chatLog {
+    height: 50vh;
+    font-size: medium;
+    text-align: left;
+    margin-left: 10px;
 }
 
-#textInput {
-    width: 100%;
+br {
+    line-height: 50%;
+}
+
+#chat {
+    text-align: center;
+    width: 20vw;
 }
 
 #everything {
@@ -96,10 +98,13 @@ body {
     display: flex;
     border-radius: 10px;
     padding: 10px;
-    margin-left: 60px;
-    margin-right: 30px;
     flex-direction: column;
     height: 30%;
-    margin-top: 12.5%;
+    margin: auto;
     vertical-align: middle;
+}
+
+#gameMode {
+    font-size: 15px;
+    text-align: center;
 }

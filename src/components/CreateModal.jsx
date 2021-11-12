@@ -74,8 +74,12 @@ function CreateModal(props) {
             setSettings({
               vsComputer: false,
               startColor: 'white',
-              white: { address, time: clockTime, rating: '-' },
-              black: { address: opponentAddress, time: clockTime, rating: '-' },
+              white: {
+                address, time: clockTime, rating: '-', increment: 0,
+              },
+              black: {
+                address: opponentAddress, time: clockTime, rating: '-', increment: 0,
+              },
               streamId: `${address}/dechess/game/${currTime}`,
             });
             if (code !== '') {
