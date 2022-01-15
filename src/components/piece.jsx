@@ -3,34 +3,40 @@
 // how a piece is displayed on collection page
 import React from 'react';
 import '../styles/display.css';
+import { Button } from 'antd';
 
-function Piece(piece) {
-  const contractAddress = piece.piece.contract_address;
-  const tokenID = piece.piece.token_id;
-  const pieceData = piece.piece.external_data;
+function Piece(props) {
+  const { piece, setPiece } = props;
+  const contractAddress = piece.contract_address;
+  const tokenID = piece.token_id;
+  const pieceData = piece.external_data;
   const { attributes } = pieceData;
-  // eslint-disable-next-line no-console
-  // console.log(pieceData);
+
+  if (attributes.color !== 'white' && attributes.color !== 'black') {
+    attributes.color = 'black';
+    // there are some NFTs minted with weird colors so I'll default them to black
+  }
+
+  // console.log('piece in piece', piece);
+
   return (
-    <div>
-      <div className="piece" id={pieceData.name.replace(/\s/g, '')}>
-        <br />
-        <h1>{pieceData.name}</h1>
-        <img src={pieceData.image} alt="oops, looks like this image couldn't load" style={{ maxHeight: '300px' }} />
-        <h3 className="piece-description">
-          {`description: ${pieceData.description}`}
-        </h3>
-        <h3 className="type">
-          {`type: ${attributes['piece type']}`}
-        </h3>
-        <h3 className="color">
-          {`color: ${attributes.color}`}
-        </h3>
-        <a href={`https://opensea.io/assets/${contractAddress}/${tokenID}`} target="_blank" rel="noreferrer">
-          <img className="opensea" src="opensea.png" alt="OpenSea" />
-        </a>
-        <br />
-      </div>
+    <div className="piece" id={pieceData.name.replace(/\s/g, '')}>
+      <br />
+      <h1>{pieceData.name}</h1>
+      <img src={pieceData.image} alt="oops, looks like this image couldn't load" style={{ maxHeight: '300px' }} />
+      <h3 className="piece-description">
+        {`description: ${pieceData.description}`}
+      </h3>
+      <h3 className="type">
+        {`type: ${attributes['piece type']}`}
+      </h3>
+      <h3 className="color">
+        {`color: ${attributes.color}`}
+      </h3>
+      <a href={`https://opensea.io/assets/${contractAddress}/${tokenID}`} target="_blank" rel="noreferrer">
+        <img className="opensea" src="opensea.png" alt="OpenSea" />
+      </a>
+      <Button onClick={() => setPiece(piece)}>hi</Button>
       <br />
     </div>
   );

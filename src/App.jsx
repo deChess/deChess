@@ -20,7 +20,7 @@ import './App.css';
 function App() {
   const [settings, setSettings] = useState({ vsComputer: false });
   const [code, setCode] = useState('');
-  const [client, setClient] = useState();
+  const [client, setClient] = useState(); // streamr client
   const [address, setAddress] = useState('');
   const [provider, setProvider] = useState();
   const [ipfs, setIpfs] = useState();
@@ -72,7 +72,7 @@ function App() {
         </Route>
         <Route path="/collection">
           <Content>
-            <Collection address={address} />
+            <Collection address={address} client={client} />
           </Content>
         </Route>
         <Route path="/minter">

@@ -1,5 +1,6 @@
 /* eslint-disable linebreak-style */
 /* eslint-disable no-empty */
+/* eslint-disable no-console */
 
 import React from 'react';
 import { Menu } from 'antd';
@@ -56,7 +57,7 @@ function NavBar(props) {
               const ensAddress = await provider.lookupAddress(ethereum.selectedAddress);
               setAddress(ensAddress || currentAccount);
             // eslint-disable-next-line no-console
-            } catch (error) { console.log('error connecting to metamask '); }
+            } catch (error) { console.log('error connecting to metamask', error); }
           }
         }}
         style={{ position: 'absolute', top: 0, right: 0 }}

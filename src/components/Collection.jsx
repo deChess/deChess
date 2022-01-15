@@ -2,13 +2,176 @@
 // eslint-disable-next-line no-unused-vars
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import { Button } from 'antd';
 import Piece from './piece';
 
+const defaultSettings = {
+  white: {
+    pawn: {
+      name: 'merida white pawn',
+      description: 'default white pawn',
+      contract_address: '',
+      token_id: '',
+      image_url: '../images/pieces/merida/wP.svg',
+    },
+    rook: {
+      name: 'merida white rook',
+      description: 'default white rook',
+      contract_address: '',
+      token_id: '',
+      image_url: '../images/pieces/merida/wR.svg',
+    },
+    knight: {
+      name: 'merida white knight',
+      description: 'default white knight',
+      contract_address: '',
+      token_id: '',
+      image_url: '../images/pieces/merida/wN.svg',
+    },
+    bishop: {
+      name: 'merida white bishop',
+      description: 'default white bishop',
+      contract_address: '',
+      token_id: '',
+      image_url: '../images/pieces/merida/wB.svg',
+    },
+    queen: {
+      name: 'merida white queen',
+      description: 'default white queen',
+      contract_address: '',
+      token_id: '',
+      image_url: '../images/pieces/merida/wQ.svg',
+    },
+    king: {
+      name: 'merida white king',
+      description: 'default white king',
+      contract_address: '',
+      token_id: '',
+      image_url: '../images/pieces/merida/wK.svg',
+    },
+  },
+  black: {
+    pawn: {
+      name: 'merida black pawn',
+      description: 'default black pawn',
+      contract_address: '',
+      token_id: '',
+      image_url: '../images/pieces/merida/bP.svg',
+    },
+    rook: {
+      name: 'merida black rook',
+      description: 'default black rook',
+      contract_address: '',
+      token_id: '',
+      image_url: '../images/pieces/merida/bR.svg',
+    },
+    knight: {
+      name: 'merida black knight',
+      description: 'default black knight',
+      contract_address: '',
+      token_id: '',
+      image_url: '../images/pieces/merida/bN.svg',
+    },
+    bishop: {
+      name: 'merida black bishop',
+      description: 'default black bishop',
+      contract_address: '',
+      token_id: '',
+      image_url: '../images/pieces/merida/bB.svg',
+    },
+    queen: {
+      name: 'merida black queen',
+      description: 'default black queen',
+      contract_address: '',
+      token_id: '',
+      image_url: '../images/pieces/merida/bQ.svg',
+    },
+  },
+};
+
+// eslint-disable-next-line no-unused-vars
+const storageNode = {
+  address: '0x31546eEA76F2B2b3C5cC06B1c93601dc35c9D916',
+  url: 'https://corea1.streamr.network:8001',
+};
+
 function Collection(props) {
-  const { address } = props;
+  const { address, client } = props;
   const [chessNFTs, setChessNFTs] = useState([]);
+  const [equippedPieces, setEquippedPieces] = useState(defaultSettings);
+
+  let settingsStream = {};
+
+  const settingsStreamId = `${address}/dechess/settings/equipped_pieces`;
+
+  // eslint-disable-next-line no-unused-vars
+  const fetchSettingsStream = async () => {
+    try {
+      console.log('attempting to fetch settings stream');
+      await client.getStream(settingsStreamId)
+        .then((stream) => {
+          // setSettingsStream(stream);
+          settingsStream = stream;
+          console.log('stream fetched:', settingsStream);
+        });
+      await client.resend({
+        streamId: settingsStreamId,
+        resend: {
+          last: 1,
+        },
+      }, (message) => {
+        console.log('msg', message);
+        /* defaultSettings.black = message.black;
+        defaultSettings.white = message.white; */
+        setEquippedPieces(message);
+        // console.log('new settings', equippedPieces);
+      });
+    } catch (getErr) {
+      console.log('error fetching settings stream', getErr);
+      try {
+        console.log('attempting to create settings stream');
+        await client.createStream({
+          id: settingsStreamId,
+        }).then((stream) => {
+          // setSettingsStream(stream);
+          settingsStream = stream;
+          stream.addToStorageNode(storageNode.address);
+          stream.publish(defaultSettings);
+          console.log('stream created', stream);
+        });
+      } catch (createErr) {
+        console.log('error creating settings stream', createErr);
+      }
+    }
+  };
+
+  const setPiece = (piece) => {
+    // console.log('piece:', piece);
+    const pieceData = piece.external_data;
+    const { attributes } = pieceData;
+    const streamrPiece = {};
+
+    streamrPiece.name = pieceData.name;
+    streamrPiece.description = pieceData.description;
+    streamrPiece.contract_address = piece.contract_address;
+    streamrPiece.token_id = piece.token_id;
+    streamrPiece.image_url = pieceData.image;
+    // console.log('streamrPiece:', streamrPiece);
+
+    const pieceColor = attributes.color;
+    const pieceType = attributes['piece type'];
+
+    const newEquippedPieces = { ...equippedPieces };
+    // console.log('new equipped pieces', newEquippedPieces);
+    newEquippedPieces[pieceColor][pieceType] = streamrPiece;
+
+    setEquippedPieces(newEquippedPieces);
+
+    // console.log('default settings:', newEquippedPieces);
+  };
 
   useEffect(() => {
+    fetchSettingsStream();
     axios.get(`https://api.covalenthq.com/v1/1/address/${address}/balances_v2/?nft=true&key=${process.env.REACT_APP_COVALENT_API_KEY}`)
       .then((res) => {
         const chainTokens = res.data.data.items;
@@ -62,13 +225,16 @@ function Collection(props) {
   }, [address]);
 
   return (
-    <div>
+    <ul>
+      <Button onClick={() => console.log()}>print piece</Button>
       <br />
       {chessNFTs.map((piece) => (
-        <Piece piece={piece} />
+        <li key={piece.token_id}>
+          <Piece piece={piece} setPiece={setPiece} />
+        </li>
       )) }
       <img src="loader.gif" alt="loading" id="loader" />
-    </div>
+    </ul>
   );
 }
 
