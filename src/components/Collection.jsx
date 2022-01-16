@@ -54,7 +54,7 @@ function Collection(props) {
           // make sure everyone else can get what pieces you're using
           stream.grantPermission('stream_get', null);
           stream.grantPermission('stream_subscribe', null);
-          console.log('stream created', stream);
+          // console.log('stream created', stream);
         });
       } catch (createErr) {
         console.log('error creating settings stream', createErr);
@@ -99,15 +99,15 @@ function Collection(props) {
     const newEquippedPieces = { ...equippedPieces };
     // console.log('new equipped pieces', newEquippedPieces);
     newEquippedPieces[color][type] = streamrPiece;
-    console.log('default piece', streamrPiece, defaultSettings);
+    // console.log('default piece', streamrPiece, defaultSettings);
 
     setEquippedPieces(newEquippedPieces);
   };
 
   const saveEquippedPieces = async () => {
-    console.log('saving equipped pieces');
+    // console.log('saving equipped pieces');
     try {
-      console.log('attempting to publish changes');
+      // console.log('attempting to publish changes');
       client.publish(settingsStreamId, equippedPieces);
     } catch (publishErr) {
       console.log('failed to publish changes:', publishErr);
