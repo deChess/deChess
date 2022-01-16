@@ -2,11 +2,17 @@
 /* eslint-disable jsx-a11y/img-redundant-alt */
 // how a piece is displayed on collection page
 import React from 'react';
-import '../styles/display.css';
+import '../../styles/display.css';
 import { Button } from 'antd';
 
 function Piece(props) {
-  const { piece, setPiece } = props;
+  const {
+    piece,
+    setPiece,
+    equippedPieces,
+    setToDefault,
+  } = props;
+
   const contractAddress = piece.contract_address;
   const tokenID = piece.token_id;
   const pieceData = piece.external_data;
@@ -36,8 +42,11 @@ function Piece(props) {
       <a href={`https://opensea.io/assets/${contractAddress}/${tokenID}`} target="_blank" rel="noreferrer">
         <img className="opensea" src="opensea.png" alt="OpenSea" />
       </a>
-      <Button onClick={() => setPiece(piece)}>hi</Button>
-      <br />
+      {
+      equippedPieces[attributes.color][attributes['piece type']].name !== pieceData.name
+        ? <Button className="equipButton" onClick={() => setPiece(piece)} type="primary" shape="round" size="large">Equip</Button>
+        : <Button className="unequipButton" onClick={() => setToDefault(attributes.color, attributes['piece type'])} type="primary" shape="round" size="large">Unequip</Button>
+      }
     </div>
   );
 }

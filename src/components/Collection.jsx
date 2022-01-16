@@ -2,92 +2,9 @@
 // eslint-disable-next-line no-unused-vars
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { Button } from 'antd';
-import Piece from './piece';
-
-const defaultSettings = {
-  white: {
-    pawn: {
-      name: 'merida white pawn',
-      description: 'default white pawn',
-      contract_address: '',
-      token_id: '',
-      image_url: '../images/pieces/merida/wP.svg',
-    },
-    rook: {
-      name: 'merida white rook',
-      description: 'default white rook',
-      contract_address: '',
-      token_id: '',
-      image_url: '../images/pieces/merida/wR.svg',
-    },
-    knight: {
-      name: 'merida white knight',
-      description: 'default white knight',
-      contract_address: '',
-      token_id: '',
-      image_url: '../images/pieces/merida/wN.svg',
-    },
-    bishop: {
-      name: 'merida white bishop',
-      description: 'default white bishop',
-      contract_address: '',
-      token_id: '',
-      image_url: '../images/pieces/merida/wB.svg',
-    },
-    queen: {
-      name: 'merida white queen',
-      description: 'default white queen',
-      contract_address: '',
-      token_id: '',
-      image_url: '../images/pieces/merida/wQ.svg',
-    },
-    king: {
-      name: 'merida white king',
-      description: 'default white king',
-      contract_address: '',
-      token_id: '',
-      image_url: '../images/pieces/merida/wK.svg',
-    },
-  },
-  black: {
-    pawn: {
-      name: 'merida black pawn',
-      description: 'default black pawn',
-      contract_address: '',
-      token_id: '',
-      image_url: '../images/pieces/merida/bP.svg',
-    },
-    rook: {
-      name: 'merida black rook',
-      description: 'default black rook',
-      contract_address: '',
-      token_id: '',
-      image_url: '../images/pieces/merida/bR.svg',
-    },
-    knight: {
-      name: 'merida black knight',
-      description: 'default black knight',
-      contract_address: '',
-      token_id: '',
-      image_url: '../images/pieces/merida/bN.svg',
-    },
-    bishop: {
-      name: 'merida black bishop',
-      description: 'default black bishop',
-      contract_address: '',
-      token_id: '',
-      image_url: '../images/pieces/merida/bB.svg',
-    },
-    queen: {
-      name: 'merida black queen',
-      description: 'default black queen',
-      contract_address: '',
-      token_id: '',
-      image_url: '../images/pieces/merida/bQ.svg',
-    },
-  },
-};
+import Piece from './collection/piece';
+import PieceDisplay from './collection/pieceDisplay';
+import defaultSettings from './collection/defaultSettings';
 
 // eslint-disable-next-line no-unused-vars
 const storageNode = {
@@ -98,9 +15,8 @@ const storageNode = {
 function Collection(props) {
   const { address, client } = props;
   const [chessNFTs, setChessNFTs] = useState([]);
-  const [equippedPieces, setEquippedPieces] = useState(defaultSettings);
-
-  let settingsStream = {};
+  const [equippedPieces, setEquippedPieces] = useState(JSON.parse(JSON.stringify(defaultSettings)));
+  // const [settingsStream, setSettingsStream] = useState({});
 
   const settingsStreamId = `${address}/dechess/settings/equipped_pieces`;
 
@@ -108,12 +24,11 @@ function Collection(props) {
   const fetchSettingsStream = async () => {
     try {
       console.log('attempting to fetch settings stream');
-      await client.getStream(settingsStreamId)
+      /* await client.getStream(settingsStreamId)
         .then((stream) => {
-          // setSettingsStream(stream);
-          settingsStream = stream;
+          setSettingsStream(stream);
           console.log('stream fetched:', settingsStream);
-        });
+        }); */
       await client.resend({
         streamId: settingsStreamId,
         resend: {
@@ -121,22 +36,24 @@ function Collection(props) {
         },
       }, (message) => {
         console.log('msg', message);
-        /* defaultSettings.black = message.black;
-        defaultSettings.white = message.white; */
         setEquippedPieces(message);
         // console.log('new settings', equippedPieces);
       });
     } catch (getErr) {
       console.log('error fetching settings stream', getErr);
       try {
+        /* this is bad code because we should only create when the stream doesn't
+        exist but it can fail for other reasons e.g. user declines signature */
         console.log('attempting to create settings stream');
         await client.createStream({
           id: settingsStreamId,
         }).then((stream) => {
           // setSettingsStream(stream);
-          settingsStream = stream;
           stream.addToStorageNode(storageNode.address);
           stream.publish(defaultSettings);
+          // make sure everyone else can get what pieces you're using
+          stream.grantPermission('stream_get', null);
+          stream.grantPermission('stream_subscribe', null);
           console.log('stream created', stream);
         });
       } catch (createErr) {
@@ -170,8 +87,34 @@ function Collection(props) {
     // console.log('default settings:', newEquippedPieces);
   };
 
+  const setToDefault = (color, type) => {
+    const streamrPiece = {};
+
+    streamrPiece.name = defaultSettings[color][type].name;
+    streamrPiece.description = defaultSettings[color][type].description;
+    streamrPiece.contract_address = '';
+    streamrPiece.token_id = '';
+    streamrPiece.image_url = defaultSettings[color][type].image_url;
+
+    const newEquippedPieces = { ...equippedPieces };
+    // console.log('new equipped pieces', newEquippedPieces);
+    newEquippedPieces[color][type] = streamrPiece;
+    console.log('default piece', streamrPiece, defaultSettings);
+
+    setEquippedPieces(newEquippedPieces);
+  };
+
+  const saveEquippedPieces = async () => {
+    console.log('saving equipped pieces');
+    try {
+      console.log('attempting to publish changes');
+      client.publish(settingsStreamId, equippedPieces);
+    } catch (publishErr) {
+      console.log('failed to publish changes:', publishErr);
+    }
+  };
+
   useEffect(() => {
-    fetchSettingsStream();
     axios.get(`https://api.covalenthq.com/v1/1/address/${address}/balances_v2/?nft=true&key=${process.env.REACT_APP_COVALENT_API_KEY}`)
       .then((res) => {
         const chainTokens = res.data.data.items;
@@ -212,6 +155,7 @@ function Collection(props) {
                 // console.log('final chess nfts: ', chessNFTs);
                 const loader = document.getElementById('loader');
                 loader.style.display = 'none';
+                fetchSettingsStream(); // fetch settings after everything loads in
               }
             }
           })
@@ -225,16 +169,25 @@ function Collection(props) {
   }, [address]);
 
   return (
-    <ul>
-      <Button onClick={() => console.log()}>print piece</Button>
+    <div style={{ backgroundColor: '#2B313C' }}>
       <br />
-      {chessNFTs.map((piece) => (
-        <li key={piece.token_id}>
-          <Piece piece={piece} setPiece={setPiece} />
-        </li>
-      )) }
+      <PieceDisplay pieces={equippedPieces} saveEquippedPieces={saveEquippedPieces} />
+      <br />
+      <ul>
+        {chessNFTs.map((piece) => (
+          <li key={piece.token_id}>
+            <Piece
+              piece={piece}
+              setPiece={setPiece}
+              equippedPieces={equippedPieces}
+              setToDefault={setToDefault}
+            />
+          </li>
+        )) }
+      </ul>
       <img src="loader.gif" alt="loading" id="loader" />
-    </ul>
+      <br />
+    </div>
   );
 }
 

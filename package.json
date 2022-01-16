@@ -29,6 +29,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "redux": "^4.0.4",
+    "source-map-explorer": "^2.5.2",
     "streamr-client": "^5.5.7",
     "styled-components": "^5.3.1",
     "walletconnect": "^1.6.5",
@@ -39,7 +40,8 @@
     "start": "react-scripts start",
     "build": "react-scripts --max_old_space_size=8192 build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "analyze": "source-map-explorer 'build/static/js/*.js'"
   },
   "browserslist": {
     "production": [

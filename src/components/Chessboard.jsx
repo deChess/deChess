@@ -19,6 +19,7 @@ import queen from '../images/wQ.svg';
 import rook from '../images/wR.svg';
 import bishop from '../images/wB.svg';
 import knight from '../images/wN.svg';
+import defaultSettings from './collection/defaultSettings';
 
 const { Search } = Input;
 
@@ -107,6 +108,7 @@ function ChessBoard(props) {
   const [viewOnly, setViewOnly] = useState(true);
   const [color, setColor] = useState(startColor);
   const [orientation, setOrientation] = useState(startColor);
+  const [pieces, setPieces] = useState(JSON.parse(JSON.stringify(defaultSettings)));
 
   const currDate = new Date();
   const dateToday = `${currDate.getFullYear()}.${currDate.getMonth() + 1 < 10 ? '0' : ''}${currDate.getMonth() + 1}.${currDate.getDate() < 10 ? '0' : ''}${currDate.getDate()}`;
@@ -234,8 +236,70 @@ function ChessBoard(props) {
   const flipBoard = () => (orientation === 'white' ? 'black' : 'white');
   const turnColor = () => (chess.turn() === 'w' ? 'white' : 'black');
 
+  const setPieceImages = () => {
+    // console.log('setting images', pieces);
+    for (let i = 1; i < 65; i += 1) { // check every square
+      const piece = document.querySelector(`#chessboard > div > cg-helper > cg-container > cg-board > piece:nth-child(${i})`);
+      // console.log(i, piece);
+      if (piece !== undefined && piece !== null) {
+        const [currPieceColor, currPieceType] = piece.className.split(' ');
+        piece.style['background-image'] = `url(${pieces[currPieceColor][currPieceType].image_url})`;
+        // eslint-disable-next-line max-len
+        // console.log(i, document.querySelector(`#chessboard > div > cg-helper > cg-container > cg-board > piece:nth-child(${i})`));
+      }
+    }
+  };
+
+  const getOwnPieces = async () => {
+    try {
+      await client.resend({
+        streamId: `${home.address}/dechess/settings/equipped_pieces`,
+        resend: {
+          last: 1,
+        },
+      }, (message) => {
+        // console.log('self pieces received', message);
+        const newPieces = { ...pieces };
+        newPieces[startColor] = message[startColor];
+        setPieces(newPieces);
+      });
+    } catch (err) {
+      console.log('attempted to fetch own pieces', err);
+    }
+    // console.log('pieces set own:', pieces);
+  };
+
+  const getOpponentPieces = async () => {
+    try {
+      await client.resend({
+        streamId: `${opponent.address}/dechess/settings/equipped_pieces`,
+        resend: {
+          last: 1,
+        },
+      }, (message) => {
+        // console.log('opponent pieces received', message);
+        const newPieces = { ...pieces };
+        newPieces[opponentColor] = message[opponentColor];
+        setPieces(newPieces).then(() => {
+          setPieceImages();
+        });
+      });
+    } catch (error) {
+      console.log('attemped to fetch opponent pieces', error);
+    }
+    // console.log('pieces set opponent:', pieces);
+  };
+
   useEffect(() => {
+    setPieceImages();
+  }, [pieces]);
+
+  useEffect(() => {
+    setPieceImages();
+
     if (doOnce) {
+      getOwnPieces();
+      getOpponentPieces();
       setViewOnly(true);
     }
 
@@ -311,7 +375,7 @@ function ChessBoard(props) {
             drawOffer.drawOffered = true;
           }
         } else if (message.type === 'chat') {
-          console.log(`message sent: ${message.message}`);
+          // console.log(`message sent: ${message.message}`);
           updateChat(message);
         }
         if (message.type === 'ready') {
@@ -547,7 +611,7 @@ function ChessBoard(props) {
                     showDests: true,
                     castle: true,
                   }}
-                  check={isChecked}
+                  check={isChecked.toString()}
                   style={{ margin: '5%' }}
                   orientation={orientation}
                 />
