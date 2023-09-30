@@ -1,5 +1,8 @@
 deChess - decentralized chess
 
+[HackMoney 2021 Submission](https://ethglobal.com/showcase/dechess-yzza8)
+[ETHOnline 2021 Submission](https://ethglobal.com/showcase/dechess-svdra)
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
