@@ -115,7 +115,7 @@ function Collection(props) {
   };
 
   useEffect(() => {
-    axios.get(`https://api.covalenthq.com/v1/1/address/${address}/balances_v2/?nft=true&key=${process.env.REACT_APP_COVALENT_API_KEY}`)
+    axios.get(`https://api.covalenthq.com/v1/eth-mainnet/address/${address}/balances_v2/?nft=true&key=${process.env.REACT_APP_COVALENT_API_KEY}`)
       .then((res) => {
         const chainTokens = res.data.data.items;
         // console.log(chainTokens);
@@ -123,18 +123,25 @@ function Collection(props) {
         for (let j = 0; j < chainTokens.length; j += 1) {
           if (chainTokens[j].contract_address === '0xf6793da657495ffeff9ee6350824910abc21356c') { // rarible, ethereum
             raribleNFTs = chainTokens[j].nft_data;
-            // console.log('rarible tokens: ', raribleNFTs);
+            console.log('rarible tokens: ', raribleNFTs);
           }
         }
         for (let i = 0; i < raribleNFTs.length; i += 1) {
           raribleNFTs[i].contract_address = '0xf6793da657495ffeff9ee6350824910abc21356c';
         }
-        axios.get(`https://api.covalenthq.com/v1/137/address/${address}/balances_v2/?nft=true&key=${process.env.REACT_APP_COVALENT_API_KEY}`)
+        setChessNFTs(raribleNFTs);
+        // console.log('final chess nfts: ', chessNFTs);
+        const loader = document.getElementById('loader');
+        loader.style.display = 'none';
+        fetchSettingsStream(); // fetch settings after everything loads in
+        /*
+        axios.get(`https://api.covalenthq.com/v1/polygon/address/${address}/balances_v2/?nft=true&key=${process.env.REACT_APP_COVALENT_API_KEY}`)
           .then((nftportRes) => {
             const polygonTokens = nftportRes.data.data.items;
             for (let i = 0; i < polygonTokens.length; i += 1) {
               let newChessNFTs = raribleNFTs;
-              if (polygonTokens[i].contract_address === '0x0aee6e01d4bd12a9d80aa2fa64a2b53093fafda7' && polygonTokens[i].nft_data !== null) {
+              if (polygonTokens[i].contract_address === '0x0aee6e01d4bd12a9d80aa2fa64a2b53093fafda7'
+              && polygonTokens[i].nft_data !== null) {
                 // ^ nftport
                 const validNFTs = [];
                 // console.log(polygonTokens[i]);
@@ -148,7 +155,8 @@ function Collection(props) {
                   }
                 }
                 for (let k = 0; k < validNFTs.length; k += 1) {
-                  validNFTs[k].contract_address = 'matic/0x0aee6e01d4bd12a9d80aa2fa64a2b53093fafda7';
+                  validNFTs[k].contract_address =
+                  'matic/0x0aee6e01d4bd12a9d80aa2fa64a2b53093fafda7';
                 }
                 newChessNFTs = raribleNFTs.concat(validNFTs);
                 setChessNFTs(newChessNFTs);
@@ -162,6 +170,7 @@ function Collection(props) {
           .catch((err) => {
             console.log(err);
           });
+          */
       })
       .catch((err) => {
         console.log(err);
