@@ -1,5 +1,7 @@
 deChess - decentralized chess
 
+many of the used APIs are deprecated, but here's semi-working demo on [Cloudflare](https://dechess-static.pages.dev/).
+
 [HackMoney 2021 Submission](https://ethglobal.com/showcase/dechess-yzza8)
 
 [ETHOnline 2021 Submission](https://ethglobal.com/showcase/dechess-svdra)
